@@ -12,11 +12,11 @@ namespace SecretHitlerServer
     class Program
     {
         static Server server;
-        static int id;
+        static int vip_id;
 
         static void Main(string[] args)
         {
-            id = 0;
+            vip_id = -1;
             server = new Server(0);
             server.ClientReady += ClientReady;
             server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
@@ -34,18 +34,41 @@ namespace SecretHitlerServer
         {
             ci.OnReadBytes += ReadBytes;
             ci.OnClose += ConnectionClosed;
-            ci.Data = "player" + ++id;
+            ci.Data = "player" + ci.ID;
+            if (vip_id == -1) {
+                vip_id = ci.ID;
+                ci.Send(new byte[] { (byte)Commands.General });
+            }
             return true;
         }
 
         static void ReadBytes(ClientInfo ci, byte[] data, int len)
         {
-            Console.WriteLine($"Received message from {ci.Data}: [{string.Join(", ", data)}]");
+            if (data.Length == 0) {
+                SendErrMsg(ci, "Missing command code");
+                return;
+            }
+            Console.WriteLine($"Received data from {ci.Data}: [{string.Join(", ", data)}]");
+            switch ((Commands)data[0]) {
+                case Commands.General:
+                    break;
+                default:
+                    break;
+            }
         }
 
         static void ConnectionClosed(ClientInfo ci)
         {
+            if (ci.ID == vip_id) {
+                //set vip_id to next player or -1 if no other players connected
+            }
             Console.WriteLine(ci.Data + " left the server.");
+        }
+
+        static void SendErrMsg(ClientInfo ci, string msg)
+        {
+            byte[] err = Array.ConvertAll(((char)Commands.Error + msg).ToCharArray(), Convert.ToByte);
+            ci.Send(err);
         }
     }
 }
