@@ -8,9 +8,20 @@ namespace SecretHitlerUtilities
 {
     public class Game
     {
-
+        private int m_nextPrezIdx;
         private string m_pres, m_chanc;
         public string President { get { return m_pres; } set { if (m_parties.ContainsKey(value)) m_pres = value; } }
+        public string NextPrez {
+            get { return m_parties.ElementAt(m_nextPrezIdx).Key; }
+            set {
+                if (m_parties.ContainsKey(value)) {
+                    System.Collections.IEnumerator keys = m_parties.Keys.GetEnumerator();
+                    for (m_nextPrezIdx = 0; m_nextPrezIdx < m_parties.Count; m_nextPrezIdx++, keys.MoveNext())
+                        if ((string)keys.Current == value)
+                            break;
+                }
+            }
+        }
         public string Chancellor {
             get { return m_chanc; }
             set {
@@ -20,6 +31,7 @@ namespace SecretHitlerUtilities
                     Winner = Role.Fascist;
             }
         }
+        public string InvestigatedPlayer;
 
         public readonly int NumPlayers;
         public int NumAlive { get { return m_parties.Count; } }
@@ -42,6 +54,7 @@ namespace SecretHitlerUtilities
             NumLiberalPolicies = NumFascistPolicies = 0;
             NumPlayers = players.Count;
             rand = new Random();
+            m_nextPrezIdx = rand.Next(players.Count);
 
             int i, nf = (players.Count - 1) / 2, nl = players.Count - nf;
             for (i = 0; i < players.Count; i++) {
@@ -112,6 +125,13 @@ namespace SecretHitlerUtilities
             m_parties.Remove(player);
             if (isHitler) Winner = Role.Liberal;
             return isHitler;
+        }
+
+        public void NextPrezResult(bool elected)
+        {
+            if (elected)
+                President = NextPrez;
+            m_nextPrezIdx = (m_nextPrezIdx + 1) % NumAlive;
         }
     }
 }

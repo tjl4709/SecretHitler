@@ -4,35 +4,38 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+//FB stands for followed by
+
 namespace SecretHitlerUtilities
 {
     public enum Command : byte
     {
-        General = 0x00, //Context specific (usually info)
-        Start   = 0x01, //to server means start the game, to client followed by role
-        PosAssign=0x02, //to client followed by playername for P, to server followed by playername for C
-        Vote    = 0x03, //to client followed by playername for C, to server followed by bool
-        VoteCnt = 0x04, //followed by number of 'yes' votes
-        Policy  = 0x04, //followed by policy choices List<L/F>
-        FascPow = 0x05, //followed by FascistPower
-        Winner  = 0x0A, //followed by L/F
-        VIP     = 0x0B, //to client means they are VIP
-        Error   = 0xFF  //followed by message
+        Name    = 0x01, //to server FB new playername, to client FB T/F then connected playernames
+        Start   = 0x02, //to server means start the game, to client FB role
+        PosAssign=0x03, //to client FB playername for P, to server FB playername for C
+        Vote    = 0x04, //to client FB playername for C, to server FB bool
+        VoteCnt = 0x05, //FB number of 'yes' votes
+        Policy  = 0x06, //FB policy choices List<L/F>
+        FascPow = 0x07, //FB FascistPower
+        Winner  = 0x08, //FB L/F
+        VIP     = 0x09, //to client means they are VIP
+        General = 0xFE, //FB message
+        Error   = 0xFF  //FB message
     }
     public enum Role : byte
     {
-        None,
-        Liberal,
-        Fascist,
-        Hitler,
+        None     = 0,
+        Liberal  = 1,
+        Fascist  = 2,
+        Hitler   = 3,
         Audience = None
     }
     public enum FascistPowers : byte
     {
-        None,
-        InvestigateLoyalty,
-        SpecialElection,
-        PolicyPeek,
-        Execution
+        None             = 0,
+        InvestigateLoyalty=1, //to server FB playername, response to client FB playerrole
+        SpecialElection  = 2, //to server FB playername
+        PolicyPeek       = 3, //to client FB next three policies
+        Execution        = 4  //to server FB playername
     }
 }
