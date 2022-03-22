@@ -33,14 +33,13 @@ namespace SecretHitlerClient
             this.ErrorLabel = new System.Windows.Forms.Label();
             this.SubmitButton = new System.Windows.Forms.Button();
             this.UsernameEdit = new System.Windows.Forms.TextBox();
-            this.PortEdit = new System.Windows.Forms.TextBox();
+            this.IPPortEdit = new System.Windows.Forms.TextBox();
             this.UsernameLabel = new System.Windows.Forms.Label();
             this.IpPortLabel = new System.Windows.Forms.Label();
-            this.IPEdit = new SecretHitlerClient.IPAddressControl();
             this.PlayerListPanel = new System.Windows.Forms.Panel();
-            this.StartButton = new System.Windows.Forms.Button();
-            this.listBox1 = new System.Windows.Forms.ListBox();
             this.PlayerLabel = new System.Windows.Forms.Label();
+            this.PlayerListBox = new System.Windows.Forms.ListBox();
+            this.StartButton = new System.Windows.Forms.Button();
             this.LoginPanel.SuspendLayout();
             this.PlayerListPanel.SuspendLayout();
             this.SuspendLayout();
@@ -50,10 +49,9 @@ namespace SecretHitlerClient
             this.LoginPanel.Controls.Add(this.ErrorLabel);
             this.LoginPanel.Controls.Add(this.SubmitButton);
             this.LoginPanel.Controls.Add(this.UsernameEdit);
-            this.LoginPanel.Controls.Add(this.PortEdit);
+            this.LoginPanel.Controls.Add(this.IPPortEdit);
             this.LoginPanel.Controls.Add(this.UsernameLabel);
             this.LoginPanel.Controls.Add(this.IpPortLabel);
-            this.LoginPanel.Controls.Add(this.IPEdit);
             this.LoginPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LoginPanel.Location = new System.Drawing.Point(0, 0);
             this.LoginPanel.Margin = new System.Windows.Forms.Padding(4);
@@ -66,7 +64,7 @@ namespace SecretHitlerClient
             this.ErrorLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ErrorLabel.BackColor = System.Drawing.Color.LightSalmon;
             this.ErrorLabel.ForeColor = System.Drawing.Color.Red;
-            this.ErrorLabel.Location = new System.Drawing.Point(392, 187);
+            this.ErrorLabel.Location = new System.Drawing.Point(392, 189);
             this.ErrorLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.ErrorLabel.Name = "ErrorLabel";
             this.ErrorLabel.Size = new System.Drawing.Size(287, 36);
@@ -89,22 +87,22 @@ namespace SecretHitlerClient
             // UsernameEdit
             // 
             this.UsernameEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.UsernameEdit.Location = new System.Drawing.Point(473, 265);
+            this.UsernameEdit.Location = new System.Drawing.Point(471, 265);
             this.UsernameEdit.Margin = new System.Windows.Forms.Padding(4);
             this.UsernameEdit.Name = "UsernameEdit";
-            this.UsernameEdit.Size = new System.Drawing.Size(204, 20);
+            this.UsernameEdit.Size = new System.Drawing.Size(206, 20);
             this.UsernameEdit.TabIndex = 5;
             this.UsernameEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.UsernameEdit_KeyPress);
             // 
-            // PortEdit
+            // IPPortEdit
             // 
-            this.PortEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.PortEdit.Location = new System.Drawing.Point(615, 233);
-            this.PortEdit.Margin = new System.Windows.Forms.Padding(4);
-            this.PortEdit.Name = "PortEdit";
-            this.PortEdit.Size = new System.Drawing.Size(63, 20);
-            this.PortEdit.TabIndex = 4;
-            this.PortEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PortEdit_KeyPress);
+            this.IPPortEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.IPPortEdit.Location = new System.Drawing.Point(471, 238);
+            this.IPPortEdit.Margin = new System.Windows.Forms.Padding(4);
+            this.IPPortEdit.Name = "IPPortEdit";
+            this.IPPortEdit.Size = new System.Drawing.Size(207, 20);
+            this.IPPortEdit.TabIndex = 4;
+            this.IPPortEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IPPortEdit_KeyPress);
             // 
             // UsernameLabel
             // 
@@ -128,20 +126,10 @@ namespace SecretHitlerClient
             this.IpPortLabel.TabIndex = 1;
             this.IpPortLabel.Text = "IP and Port:";
             // 
-            // IPEdit
-            // 
-            this.IPEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.IPEdit.Location = new System.Drawing.Point(473, 233);
-            this.IPEdit.Margin = new System.Windows.Forms.Padding(4);
-            this.IPEdit.Name = "IPEdit";
-            this.IPEdit.Size = new System.Drawing.Size(132, 20);
-            this.IPEdit.TabIndex = 0;
-            this.IPEdit.Text = "0.0.0.0";
-            // 
             // PlayerListPanel
             // 
             this.PlayerListPanel.Controls.Add(this.PlayerLabel);
-            this.PlayerListPanel.Controls.Add(this.listBox1);
+            this.PlayerListPanel.Controls.Add(this.PlayerListBox);
             this.PlayerListPanel.Controls.Add(this.StartButton);
             this.PlayerListPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PlayerListPanel.Location = new System.Drawing.Point(0, 0);
@@ -149,25 +137,6 @@ namespace SecretHitlerClient
             this.PlayerListPanel.Size = new System.Drawing.Size(1067, 554);
             this.PlayerListPanel.TabIndex = 1;
             this.PlayerListPanel.Visible = false;
-            // 
-            // StartButton
-            // 
-            this.StartButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.StartButton.Location = new System.Drawing.Point(500, 320);
-            this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(75, 23);
-            this.StartButton.TabIndex = 0;
-            this.StartButton.Text = "Start";
-            this.StartButton.UseVisualStyleBackColor = true;
-            // 
-            // listBox1
-            // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.ItemHeight = 16;
-            this.listBox1.Location = new System.Drawing.Point(435, 146);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(204, 164);
-            this.listBox1.TabIndex = 1;
             // 
             // PlayerLabel
             // 
@@ -178,6 +147,25 @@ namespace SecretHitlerClient
             this.PlayerLabel.Size = new System.Drawing.Size(44, 13);
             this.PlayerLabel.TabIndex = 2;
             this.PlayerLabel.Text = "Players:";
+            // 
+            // PlayerListBox
+            // 
+            this.PlayerListBox.FormattingEnabled = true;
+            this.PlayerListBox.ItemHeight = 16;
+            this.PlayerListBox.Location = new System.Drawing.Point(435, 146);
+            this.PlayerListBox.Name = "PlayerListBox";
+            this.PlayerListBox.Size = new System.Drawing.Size(204, 164);
+            this.PlayerListBox.TabIndex = 1;
+            // 
+            // StartButton
+            // 
+            this.StartButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.StartButton.Location = new System.Drawing.Point(500, 320);
+            this.StartButton.Name = "StartButton";
+            this.StartButton.Size = new System.Drawing.Size(75, 23);
+            this.StartButton.TabIndex = 0;
+            this.StartButton.Text = "Start";
+            this.StartButton.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -203,16 +191,15 @@ namespace SecretHitlerClient
         #endregion
 
         private System.Windows.Forms.Panel LoginPanel;
-        private IPAddressControl IPEdit;
         private System.Windows.Forms.Label UsernameLabel;
         private System.Windows.Forms.Label IpPortLabel;
         private System.Windows.Forms.TextBox UsernameEdit;
-        private System.Windows.Forms.TextBox PortEdit;
+        private System.Windows.Forms.TextBox IPPortEdit;
         private System.Windows.Forms.Button SubmitButton;
         private System.Windows.Forms.Label ErrorLabel;
         private System.Windows.Forms.Panel PlayerListPanel;
         private System.Windows.Forms.Label PlayerLabel;
-        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.ListBox PlayerListBox;
         private System.Windows.Forms.Button StartButton;
     }
 }
