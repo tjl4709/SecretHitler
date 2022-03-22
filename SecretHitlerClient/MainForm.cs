@@ -20,12 +20,29 @@ namespace SecretHitlerClient
         ClientInfo m_ci;
         List<string> m_players;
         bool m_vip;
+        Role m_role;
 
-        public MainForm()
+        public MainForm(string[] args = null)
         {
             m_vip = false;
             m_players = new List<string>(10);
             InitializeComponent();
+            UsernameDisplay.Text = "";
+            MainForm_Resize(this, EventArgs.Empty);
+            if (args != null && args.Length > 0) {
+                int i;
+                for (i = 0; i < args[0].Length; i++)
+                    if (!char.IsDigit(args[0][i]) && args[0][i] != '.' && args[0][i] != ':')
+                        args[0] = args[0].Remove(i--, 1);
+                IPPortEdit.Text = args[0];
+                if (args.Length > 1) {
+                    for (i = 0; i < args[1].Length; i++)
+                        if (!char.IsLetterOrDigit(args[1][i]))
+                            args[1] = args[1].Remove(i--, 1);
+                    UsernameEdit.Text = args[1];
+                    SubmitButton_Click(this, EventArgs.Empty);
+                }
+            }
         }
 
         private void ReadBytes(ClientInfo ci, byte[] data, int len)
@@ -49,6 +66,12 @@ namespace SecretHitlerClient
                         }
                         break;
                     }
+                    case Command.Start: {
+                        m_role = (Role)cmd[1];
+                        //show role dialog
+                        PlayerListToGame();
+                        break;
+                    }
                     case Command.VIP:
                         m_vip = true;
                         ShowVIP();
@@ -60,11 +83,18 @@ namespace SecretHitlerClient
             }
         }
 
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            FascistBoard.Height += GamePanel.Height / 2 - FascistBoard.Bottom;
+            LiberalBoard.Height = FascistBoard.Height;
+            LiberalBoard.Location = new Point(FascistBoard.Left, FascistBoard.Bottom);
+        }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (m_ci != null) m_ci.Close();
         }
 
+        //panel transitions
         private void LoginToPlayerList()
         {
             if (InvokeRequired) {
@@ -74,7 +104,24 @@ namespace SecretHitlerClient
             LoginPanel.Hide();
             StartButton.Visible = m_vip;
             PlayerListPanel.Show();
+            UsernameDisplay.Text = UsernameEdit.Text;
         }
+        private void PlayerListToGame()
+        {
+            if (InvokeRequired) {
+                Invoke(new Action(PlayerListToGame));
+                return;
+            }
+            PlayerListPanel.Hide();
+            if (m_players.Count < 7)
+                FascistBoard.Image = Properties.Resources.fb5;
+            else if (m_players.Count < 9)
+                FascistBoard.Image = Properties.Resources.fb7;
+            else
+                FascistBoard.Image = Properties.Resources.fb9;
+            GamePanel.Show();
+        }
+        //update UI elements
         private void ShowVIP()
         {
             if (InvokeRequired) {
@@ -83,16 +130,6 @@ namespace SecretHitlerClient
             }
             Text += ": VIP";
             StartButton.Visible = true;
-        }
-        private void UpdatePlayerListBox()
-        {
-            if (PlayerListBox.InvokeRequired) {
-                PlayerListBox.Invoke(new MethodInvoker(UpdatePlayerListBox));
-                return;
-            }
-            StartButton.Enabled = m_players.Count >= 5;
-            PlayerListBox.Items.Clear();
-            PlayerListBox.Items.AddRange(m_players.ToArray());
         }
 
         //login panel
@@ -158,6 +195,24 @@ namespace SecretHitlerClient
                 }
             } else m_ci.Send(Parser.ToBytes(Command.Name, UsernameEdit.Text));
             ErrorLabel.Visible = true;
+        }
+        //playerlist panel
+        private void UpdatePlayerListBox()
+        {
+            if (PlayerListBox.InvokeRequired) {
+                PlayerListBox.Invoke(new MethodInvoker(UpdatePlayerListBox));
+                return;
+            }
+            StartButton.Enabled = m_players.Count >= 5;
+            PlayerListBox.Items.Clear();
+            PlayerListBox.Items.AddRange(m_players.ToArray());
+        }
+        private void StartButton_Click(object sender, EventArgs e)
+        {
+            if (StartButton.Text == "Start") {
+                m_ci.Send(new byte[] { 1, (byte)Command.Start });
+                StartButton.Text = "Starting...";
+            }
         }
     }
 }

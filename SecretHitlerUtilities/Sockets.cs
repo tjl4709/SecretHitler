@@ -291,7 +291,9 @@ namespace RedCorona.Net {
 					}
 				}
 			}
+			#if DEBUG
 			Console.WriteLine(ID + " read "+read+" bytes for event handler");
+			#endif
 			ReadInternal(buf, read, false);
 		}
 		
@@ -301,9 +303,11 @@ namespace RedCorona.Net {
 			Console.WriteLine(ByteBuilder.FormatParameter(new Parameter(ba, ParameterType.Byte)));		
 		}
 		
-		void ReadInternal(byte[] buf, int read, bool alreadyEncrypted){			
-		
-		Console.WriteLine(ID + " read "+read+" bytes for event handler");
+		void ReadInternal(byte[] buf, int read, bool alreadyEncrypted)
+		{
+			#if DEBUG
+			Console.WriteLine(ID + " read "+read+" bytes for event handler");
+			#endif
 			if((!alreadyEncrypted) && (encType != EncryptionType.None)){
 				if(encComplete){
 					#if DEBUG
