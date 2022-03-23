@@ -57,14 +57,16 @@ namespace SecretHitlerUtilities
             m_nextPrezIdx = rand.Next(players.Count);
 
             int i, nf = (players.Count - 1) / 2, nl = players.Count - nf;
+            bool hitler = false;
             for (i = 0; i < players.Count; i++) {
                 if (rand.Next(nf+nl) < nl) {
                     nl--;
                     m_parties.Add(players[i], Role.Liberal);
                 } else {
-                    if (rand.Next(nf) == 0)
+                    if (!hitler && rand.Next(nf) == 0) {
                         m_parties.Add(players[i], Role.Hitler);
-                    else m_parties.Add(players[i], Role.Fascist);
+                        hitler = true;
+                    } else m_parties.Add(players[i], Role.Fascist);
                     nf--;
                 }
             }

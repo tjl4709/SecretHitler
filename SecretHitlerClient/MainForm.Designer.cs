@@ -62,9 +62,8 @@ namespace SecretHitlerClient
             this.LoginPanel.Controls.Add(this.IpPortLabel);
             this.LoginPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.LoginPanel.Location = new System.Drawing.Point(0, 0);
-            this.LoginPanel.Margin = new System.Windows.Forms.Padding(4);
             this.LoginPanel.Name = "LoginPanel";
-            this.LoginPanel.Size = new System.Drawing.Size(1067, 554);
+            this.LoginPanel.Size = new System.Drawing.Size(800, 450);
             this.LoginPanel.TabIndex = 0;
             // 
             // ErrorLabel
@@ -72,10 +71,9 @@ namespace SecretHitlerClient
             this.ErrorLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ErrorLabel.BackColor = System.Drawing.Color.LightSalmon;
             this.ErrorLabel.ForeColor = System.Drawing.Color.Red;
-            this.ErrorLabel.Location = new System.Drawing.Point(392, 189);
-            this.ErrorLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.ErrorLabel.Location = new System.Drawing.Point(294, 154);
             this.ErrorLabel.Name = "ErrorLabel";
-            this.ErrorLabel.Size = new System.Drawing.Size(287, 36);
+            this.ErrorLabel.Size = new System.Drawing.Size(215, 29);
             this.ErrorLabel.TabIndex = 7;
             this.ErrorLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.ErrorLabel.Visible = false;
@@ -83,10 +81,9 @@ namespace SecretHitlerClient
             // SubmitButton
             // 
             this.SubmitButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.SubmitButton.Location = new System.Drawing.Point(485, 297);
-            this.SubmitButton.Margin = new System.Windows.Forms.Padding(4);
+            this.SubmitButton.Location = new System.Drawing.Point(364, 241);
             this.SubmitButton.Name = "SubmitButton";
-            this.SubmitButton.Size = new System.Drawing.Size(100, 28);
+            this.SubmitButton.Size = new System.Drawing.Size(75, 23);
             this.SubmitButton.TabIndex = 6;
             this.SubmitButton.Text = "Submit";
             this.SubmitButton.UseVisualStyleBackColor = true;
@@ -95,20 +92,18 @@ namespace SecretHitlerClient
             // UsernameEdit
             // 
             this.UsernameEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.UsernameEdit.Location = new System.Drawing.Point(471, 265);
-            this.UsernameEdit.Margin = new System.Windows.Forms.Padding(4);
+            this.UsernameEdit.Location = new System.Drawing.Point(353, 215);
             this.UsernameEdit.Name = "UsernameEdit";
-            this.UsernameEdit.Size = new System.Drawing.Size(206, 20);
+            this.UsernameEdit.Size = new System.Drawing.Size(156, 20);
             this.UsernameEdit.TabIndex = 5;
             this.UsernameEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.UsernameEdit_KeyPress);
             // 
             // IPPortEdit
             // 
             this.IPPortEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.IPPortEdit.Location = new System.Drawing.Point(471, 238);
-            this.IPPortEdit.Margin = new System.Windows.Forms.Padding(4);
+            this.IPPortEdit.Location = new System.Drawing.Point(353, 193);
             this.IPPortEdit.Name = "IPPortEdit";
-            this.IPPortEdit.Size = new System.Drawing.Size(207, 20);
+            this.IPPortEdit.Size = new System.Drawing.Size(156, 20);
             this.IPPortEdit.TabIndex = 4;
             this.IPPortEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.IPPortEdit_KeyPress);
             // 
@@ -116,8 +111,7 @@ namespace SecretHitlerClient
             // 
             this.UsernameLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.UsernameLabel.AutoSize = true;
-            this.UsernameLabel.Location = new System.Drawing.Point(388, 268);
-            this.UsernameLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.UsernameLabel.Location = new System.Drawing.Point(291, 218);
             this.UsernameLabel.Name = "UsernameLabel";
             this.UsernameLabel.Size = new System.Drawing.Size(58, 13);
             this.UsernameLabel.TabIndex = 2;
@@ -127,8 +121,7 @@ namespace SecretHitlerClient
             // 
             this.IpPortLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.IpPortLabel.AutoSize = true;
-            this.IpPortLabel.Location = new System.Drawing.Point(388, 241);
-            this.IpPortLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.IpPortLabel.Location = new System.Drawing.Point(291, 196);
             this.IpPortLabel.Name = "IpPortLabel";
             this.IpPortLabel.Size = new System.Drawing.Size(63, 13);
             this.IpPortLabel.TabIndex = 1;
@@ -141,8 +134,9 @@ namespace SecretHitlerClient
             this.PlayerListPanel.Controls.Add(this.StartButton);
             this.PlayerListPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PlayerListPanel.Location = new System.Drawing.Point(0, 0);
+            this.PlayerListPanel.Margin = new System.Windows.Forms.Padding(2);
             this.PlayerListPanel.Name = "PlayerListPanel";
-            this.PlayerListPanel.Size = new System.Drawing.Size(1067, 554);
+            this.PlayerListPanel.Size = new System.Drawing.Size(800, 450);
             this.PlayerListPanel.TabIndex = 1;
             this.PlayerListPanel.Visible = false;
             // 
@@ -150,7 +144,8 @@ namespace SecretHitlerClient
             // 
             this.PlayerLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.PlayerLabel.AutoSize = true;
-            this.PlayerLabel.Location = new System.Drawing.Point(432, 129);
+            this.PlayerLabel.Location = new System.Drawing.Point(324, 105);
+            this.PlayerLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.PlayerLabel.Name = "PlayerLabel";
             this.PlayerLabel.Size = new System.Drawing.Size(44, 13);
             this.PlayerLabel.TabIndex = 2;
@@ -160,18 +155,19 @@ namespace SecretHitlerClient
             // 
             this.PlayerListBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.PlayerListBox.FormattingEnabled = true;
-            this.PlayerListBox.ItemHeight = 16;
-            this.PlayerListBox.Location = new System.Drawing.Point(435, 146);
+            this.PlayerListBox.Location = new System.Drawing.Point(326, 119);
+            this.PlayerListBox.Margin = new System.Windows.Forms.Padding(2);
             this.PlayerListBox.Name = "PlayerListBox";
-            this.PlayerListBox.Size = new System.Drawing.Size(204, 164);
+            this.PlayerListBox.Size = new System.Drawing.Size(154, 134);
             this.PlayerListBox.TabIndex = 1;
             // 
             // StartButton
             // 
             this.StartButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.StartButton.Location = new System.Drawing.Point(500, 320);
+            this.StartButton.Location = new System.Drawing.Point(375, 260);
+            this.StartButton.Margin = new System.Windows.Forms.Padding(2);
             this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(75, 23);
+            this.StartButton.Size = new System.Drawing.Size(56, 19);
             this.StartButton.TabIndex = 0;
             this.StartButton.Text = "Start";
             this.StartButton.UseVisualStyleBackColor = true;
@@ -184,32 +180,32 @@ namespace SecretHitlerClient
             this.GamePanel.Controls.Add(this.RoleDisplay);
             this.GamePanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.GamePanel.Location = new System.Drawing.Point(0, 0);
+            this.GamePanel.Margin = new System.Windows.Forms.Padding(2);
             this.GamePanel.Name = "GamePanel";
-            this.GamePanel.Size = new System.Drawing.Size(1067, 554);
+            this.GamePanel.Size = new System.Drawing.Size(800, 450);
             this.GamePanel.TabIndex = 3;
             this.GamePanel.Visible = false;
             // 
             // LiberalBoard
             // 
-            this.LiberalBoard.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.LiberalBoard.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.LiberalBoard.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.LiberalBoard.Image = global::SecretHitlerClient.Properties.Resources.lb;
-            this.LiberalBoard.Location = new System.Drawing.Point(12, 277);
+            this.LiberalBoard.Location = new System.Drawing.Point(9, 225);
+            this.LiberalBoard.Margin = new System.Windows.Forms.Padding(2);
             this.LiberalBoard.Name = "LiberalBoard";
-            this.LiberalBoard.Size = new System.Drawing.Size(720, 265);
+            this.LiberalBoard.Size = new System.Drawing.Size(540, 215);
             this.LiberalBoard.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.LiberalBoard.TabIndex = 3;
             this.LiberalBoard.TabStop = false;
             // 
             // FascistBoard
             // 
-            this.FascistBoard.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.FascistBoard.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.FascistBoard.Location = new System.Drawing.Point(12, 12);
+            this.FascistBoard.Location = new System.Drawing.Point(9, 10);
+            this.FascistBoard.Margin = new System.Windows.Forms.Padding(2);
             this.FascistBoard.Name = "FascistBoard";
-            this.FascistBoard.Size = new System.Drawing.Size(720, 265);
+            this.FascistBoard.Size = new System.Drawing.Size(540, 215);
             this.FascistBoard.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.FascistBoard.TabIndex = 2;
             this.FascistBoard.TabStop = false;
@@ -219,9 +215,10 @@ namespace SecretHitlerClient
             this.RoleDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.RoleDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.RoleDisplay.ForeColor = System.Drawing.SystemColors.HighlightText;
-            this.RoleDisplay.Location = new System.Drawing.Point(888, 38);
+            this.RoleDisplay.Location = new System.Drawing.Point(666, 31);
+            this.RoleDisplay.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.RoleDisplay.Name = "RoleDisplay";
-            this.RoleDisplay.Size = new System.Drawing.Size(167, 29);
+            this.RoleDisplay.Size = new System.Drawing.Size(125, 24);
             this.RoleDisplay.TabIndex = 1;
             this.RoleDisplay.Text = "role";
             this.RoleDisplay.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -231,25 +228,25 @@ namespace SecretHitlerClient
             this.UsernameDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.UsernameDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.UsernameDisplay.ForeColor = System.Drawing.SystemColors.HighlightText;
-            this.UsernameDisplay.Location = new System.Drawing.Point(888, 9);
+            this.UsernameDisplay.Location = new System.Drawing.Point(666, 7);
+            this.UsernameDisplay.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.UsernameDisplay.Name = "UsernameDisplay";
-            this.UsernameDisplay.Size = new System.Drawing.Size(167, 29);
+            this.UsernameDisplay.Size = new System.Drawing.Size(125, 24);
             this.UsernameDisplay.TabIndex = 0;
             this.UsernameDisplay.Text = "playername";
             this.UsernameDisplay.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Salmon;
-            this.ClientSize = new System.Drawing.Size(1067, 554);
+            this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.UsernameDisplay);
+            this.Controls.Add(this.GamePanel);
             this.Controls.Add(this.PlayerListPanel);
             this.Controls.Add(this.LoginPanel);
-            this.Controls.Add(this.GamePanel);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "Secret Hitler";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);

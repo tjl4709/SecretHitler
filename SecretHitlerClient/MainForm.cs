@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using SecretHitlerUtilities;
+using SecretHitlerClient.Properties;
 
 namespace SecretHitlerClient
 {
@@ -21,6 +22,7 @@ namespace SecretHitlerClient
         List<string> m_players;
         bool m_vip;
         Role m_role;
+        Popup m_popup;
 
         public MainForm(string[] args = null)
         {
@@ -68,7 +70,7 @@ namespace SecretHitlerClient
                     }
                     case Command.Start: {
                         m_role = (Role)cmd[1];
-                        //show role dialog
+                        OpenRolePopup();
                         PlayerListToGame();
                         break;
                     }
@@ -86,12 +88,54 @@ namespace SecretHitlerClient
         private void MainForm_Resize(object sender, EventArgs e)
         {
             FascistBoard.Height += GamePanel.Height / 2 - FascistBoard.Bottom;
+            FascistBoard.Width = (int)Math.Round((double)FascistBoard.Height * LiberalBoard.Image.Width / LiberalBoard.Image.Height);
             LiberalBoard.Height = FascistBoard.Height;
+            LiberalBoard.Width = FascistBoard.Width;
             LiberalBoard.Location = new Point(FascistBoard.Left, FascistBoard.Bottom);
+            if (m_popup != null)
+                m_popup.Location = new Point((GamePanel.Width - m_popup.Width) / 2, (GamePanel.Height - m_popup.Height) / 2);
         }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (m_ci != null) m_ci.Close();
+        }
+
+        //popups
+        private void OpenRolePopup()
+        {
+            string title = "Party Membership and Secret Role";
+            if (m_role == Role.Liberal)
+                OpenPopup("You are a Liberal. Enact 5 Liberal policies or execute Hitler.",
+                    title, new Bitmap[] { Resources.lpm, Resources.lsr });
+            else
+                OpenPopup("You are a Fascist. Enact 6 Fascist policies or elect Hitler as" +
+                    " Chancellor after enacting 3 Fascist policies", title, new Bitmap[]
+                    { Resources.fpm, m_role==Role.Fascist ? Resources.fsr : Resources.hsr});
+        }
+        private void OpenPopup(string caption, string title, Bitmap[] imgs)
+        {
+            if (InvokeRequired) {
+                Invoke(new Action(() => OpenPopup(caption, title, imgs)));
+                return;
+            }
+            while (m_popup != null) Thread.Sleep(500);
+            m_popup = new Popup(caption, title, imgs);
+            m_popup.CloseButton.Click += ClosePopup;
+            m_popup.AdjustSize();
+            m_popup.Location = new Point((GamePanel.Width - m_popup.Width) / 2, (GamePanel.Height - m_popup.Height) / 2);
+            Controls.Add(m_popup);
+            m_popup.Show();
+        }
+        private void ClosePopup(object sender, EventArgs e)
+        {
+            if (m_popup.InvokeRequired) {
+                Invoke(new Action(() => Controls.Remove(m_popup)));
+                m_popup.Invoke(new MethodInvoker(m_popup.Dispose));
+            } else {
+                Controls.Remove(m_popup);
+                m_popup.Dispose();
+            }
+            m_popup = null;
         }
 
         //panel transitions
@@ -113,6 +157,7 @@ namespace SecretHitlerClient
                 return;
             }
             PlayerListPanel.Hide();
+            RoleDisplay.Text = m_role.ToString();
             if (m_players.Count < 7)
                 FascistBoard.Image = Properties.Resources.fb5;
             else if (m_players.Count < 9)
