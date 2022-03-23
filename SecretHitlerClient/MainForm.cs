@@ -23,6 +23,8 @@ namespace SecretHitlerClient
         bool m_vip;
         Role m_role;
         Popup m_popup;
+        PictureBox[] m_libPols, m_fascPols;
+        string m_pres, m_chanc;
 
         public MainForm(string[] args = null)
         {
@@ -30,7 +32,31 @@ namespace SecretHitlerClient
             m_players = new List<string>(10);
             InitializeComponent();
             UsernameDisplay.Text = "";
+            //add policy picture boxes
+            m_libPols = new PictureBox[5];
+            for (int i = 0; i < m_libPols.Length; i++) {
+                m_libPols[i] = new PictureBox() {
+                    Image = Resources.lpol,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Visible = false,
+                    BackColor = i < 4 ? Color.FromArgb(97,200,217) : Color.FromArgb(0,78,110)
+                };
+                m_libPols[i].BringToFront();
+            }
+            GamePanel.Controls.AddRange(m_libPols);
+            m_fascPols = new PictureBox[6];
+            for (int i = 0; i < m_fascPols.Length; i++) {
+                m_fascPols[i] = new PictureBox() {
+                    Image = Resources.fpol,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Visible = false,
+                    BackColor = i < 3 ? Color.FromArgb(230,100,67) : Color.FromArgb(153,2,0)
+                };
+                m_fascPols[i].BringToFront();
+            }
+            GamePanel.Controls.AddRange(m_fascPols);
             MainForm_Resize(this, EventArgs.Empty);
+            //parse args
             if (args != null && args.Length > 0) {
                 int i;
                 for (i = 0; i < args[0].Length; i++)
@@ -87,13 +113,31 @@ namespace SecretHitlerClient
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
+            //resize boards
             FascistBoard.Height += GamePanel.Height / 2 - FascistBoard.Bottom;
             FascistBoard.Width = (int)Math.Round((double)FascistBoard.Height * LiberalBoard.Image.Width / LiberalBoard.Image.Height);
             LiberalBoard.Height = FascistBoard.Height;
             LiberalBoard.Width = FascistBoard.Width;
             LiberalBoard.Location = new Point(FascistBoard.Left, FascistBoard.Bottom);
+            FascistBoard.SendToBack();
+            LiberalBoard.SendToBack();
+            //recenter popup
             if (m_popup != null)
                 m_popup.Location = new Point((GamePanel.Width - m_popup.Width) / 2, (GamePanel.Height - m_popup.Height) / 2);
+            //resize and align policies
+            double hFrac = 0.46;
+            for (int i = 0; i < m_libPols.Length; i++) {
+                m_libPols[i].Height = (int)Math.Round(hFrac * LiberalBoard.Height);
+                m_libPols[i].Width = (int)Math.Round((double)m_libPols[i].Height * m_libPols[i].Image.Width / m_libPols[i].Image.Height);
+                m_libPols[i].Location = new Point((int)Math.Round(LiberalBoard.Left + (0.175 + 0.134*i) * LiberalBoard.Width),
+                    LiberalBoard.Top + (int)Math.Round((1 - hFrac) / 2 * LiberalBoard.Height));
+            }
+            for (int i = 0; i < m_fascPols.Length; i++) {
+                m_fascPols[i].Height = (int)Math.Round(hFrac * FascistBoard.Height);
+                m_fascPols[i].Width = (int)Math.Round((double)m_fascPols[i].Height * m_fascPols[i].Image.Width / m_fascPols[i].Image.Height);
+                m_fascPols[i].Location = new Point((int)Math.Round(FascistBoard.Left + (0.108 + 0.1348*i) * FascistBoard.Width),
+                    FascistBoard.Top + (int)Math.Round((1 - hFrac) / 2 * FascistBoard.Height));
+            }
         }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -158,12 +202,13 @@ namespace SecretHitlerClient
             }
             PlayerListPanel.Hide();
             RoleDisplay.Text = m_role.ToString();
-            if (m_players.Count < 7)
-                FascistBoard.Image = Properties.Resources.fb5;
-            else if (m_players.Count < 9)
-                FascistBoard.Image = Properties.Resources.fb7;
-            else
-                FascistBoard.Image = Properties.Resources.fb9;
+            //choose fascist board
+            if (m_players.Count < 7) FascistBoard.Image = Properties.Resources.fb5;
+            else if (m_players.Count < 9) FascistBoard.Image = Properties.Resources.fb7;
+            else FascistBoard.Image = Properties.Resources.fb9;
+            //setup PlayerTable
+            m_players.Remove(UsernameDisplay.Text);
+            UpdatePlayerTable();
             GamePanel.Show();
         }
         //update UI elements
@@ -252,11 +297,24 @@ namespace SecretHitlerClient
             PlayerListBox.Items.Clear();
             PlayerListBox.Items.AddRange(m_players.ToArray());
         }
+
         private void StartButton_Click(object sender, EventArgs e)
         {
             if (StartButton.Text == "Start") {
                 m_ci.Send(new byte[] { 1, (byte)Command.Start });
                 StartButton.Text = "Starting...";
+            }
+        }
+        //game panel
+        private void UpdatePlayerTable()
+        {
+            if (PlayerTable.InvokeRequired) {
+                PlayerTable.Invoke(new MethodInvoker(UpdatePlayerTable));
+                return;
+            }
+            PlayerTable.RowCount = m_players.Count;
+            for (int i = 0; i < m_players.Count; i++) {
+                PlayerTable.SetCellPosition(new Label() { Text = m_players[i] }, new TableLayoutPanelCellPosition(1, i));
             }
         }
     }
