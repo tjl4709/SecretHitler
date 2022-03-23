@@ -125,22 +125,7 @@ namespace SecretHitlerServer
                                             m_clients[m_game.President].Send(new byte[] { 4, (byte)Command.Policy, (byte)m_policies[0], (byte)m_policies[1], (byte)m_policies[2] });
                                         }
                                     } else {
-                                        m_electTrack++;
-                                        if (m_electTrack >= 3) {
-                                            m_electTrack = 0;
-                                            Role policy = m_game.Draw(1)[0];
-                                            m_server.Broadcast(new byte[] { 2, (byte)Command.Policy, (byte)policy });
-                                            Console.WriteLine("The people were fed up with the inactive govt and enacted a " + policy + "policy.");
-                                            m_game.Play(policy);
-                                            if (m_game.Winner != Role.None) {
-                                                m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
-                                                Console.WriteLine("The " + m_game.Winner + "s enacted enough policies and won!");
-                                                break;
-                                            }
-                                            m_game.President = m_game.Chancellor = "";
-                                        }
-                                        Console.WriteLine(m_game.NextPrez + " is the next President.");
-                                        m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
+                                        IncElectTrack();
                                     }
                                 }
                             } else ci.Send(Parser.ErrMsg("Improper format: Vote command must only contain boolean value"));
@@ -155,7 +140,7 @@ namespace SecretHitlerServer
                                     m_clients[m_game.Chancellor].Send(new byte[] { 3, (byte)Command.Policy, (byte)m_policies[0], (byte)m_policies[1] });
                                 } else {
                                     Console.WriteLine("A " + (Role)cmd[1] + " ploicy was enacted.");
-                                    m_server.Broadcast(cmd);
+                                    m_server.Broadcast(new byte[] { 2, (byte)Command.Policy, cmd[1] });
                                     m_game.Discard(m_policies[0]);
                                     FascistPowers pow = m_game.Play((Role)cmd[1]);
                                     if (m_game.Winner != Role.None) {
@@ -180,7 +165,23 @@ namespace SecretHitlerServer
                     }
                     case Command.FascPow: {
                         if (m_game != null) {
-                            if ((string)ci.Data == m_game.President) {
+                            if ((FascistPowers)cmd[1] == FascistPowers.Veto) {
+                                string msg;
+                                if ((string)ci.Data == m_game.Chancellor) {
+                                    Console.WriteLine((msg = "The Chancellor has requested a veto") + '.');
+                                    m_server.Broadcast(Parser.ToBytes(Command.General, msg));
+                                    m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
+                                } else if ((string)ci.Data == m_game.President) {
+                                    if (cmd[2] == 1) {
+                                        Console.WriteLine((msg = "The President has accepted the veto") + '.');
+                                    } else
+                                        Console.WriteLine((msg = "The President has denied the veto") + '.');
+                                    m_server.Broadcast(Parser.ToBytes(Command.General, msg));
+                                    m_clients[m_game.Chancellor].Send(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, cmd[2] });
+                                    if (cmd[2] == 1)
+                                        IncElectTrack();
+                                }
+                            } else if ((string)ci.Data == m_game.President) {
                                 string player = "";
                                 if ((FascistPowers)cmd[1] != FascistPowers.PolicyPeek)
                                     player = Parser.ToString(cmd, 2);
@@ -254,6 +255,25 @@ namespace SecretHitlerServer
                     m_clients[m_players[i]].Send(Parser.ToBytes(Command.Start, msg));
                 }
         }
+        static void IncElectTrack()
+        {
+            m_electTrack++;
+            if (m_electTrack >= 3) {
+                m_electTrack = 0;
+                Role policy = m_game.Draw(1)[0];
+                m_server.Broadcast(new byte[] { 2, (byte)Command.Policy, (byte)policy });
+                Console.WriteLine("The people were fed up with the inactive govt and enacted a " + policy + "policy.");
+                m_game.Play(policy);
+                if (m_game.Winner != Role.None) {
+                    m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
+                    Console.WriteLine("The " + m_game.Winner + "s enacted enough policies and won!");
+                    return;
+                }
+                m_game.President = m_game.Chancellor = "";
+            }
+            Console.WriteLine(m_game.NextPrez + " is the next President.");
+            m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
+        }
 
         static void ConnectionClosed(ClientInfo ci)
         {
@@ -283,6 +303,7 @@ namespace SecretHitlerServer
                         m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, (string)ci.Data));
                         m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected and was hitler"));
                         m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
+                        Console.WriteLine("Hitler has left so the Liberals win.");
                     } else m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected"));
             } else {
                 foreach (string key in m_clients.Keys)
