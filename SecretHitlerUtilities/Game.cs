@@ -84,7 +84,7 @@ namespace SecretHitlerUtilities
             int j;
             for (int i = 0; i < num; i++) {
                 j = rand.Next(draw.Count);
-                drew[i] = draw[j];
+                drew.Add(draw[j]);
                 draw.RemoveAt(j);
             }
             return drew;

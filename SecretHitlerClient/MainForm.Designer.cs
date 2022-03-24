@@ -41,26 +41,49 @@ namespace SecretHitlerClient
             this.PlayerListBox = new System.Windows.Forms.ListBox();
             this.StartButton = new System.Windows.Forms.Button();
             this.GamePanel = new System.Windows.Forms.Panel();
+            this.PlayerTable = new System.Windows.Forms.TableLayoutPanel();
+            this.Player6Label = new System.Windows.Forms.Label();
+            this.Player1Label = new System.Windows.Forms.Label();
+            this.Player2Label = new System.Windows.Forms.Label();
+            this.Player3Label = new System.Windows.Forms.Label();
+            this.Player4Label = new System.Windows.Forms.Label();
+            this.Player5Label = new System.Windows.Forms.Label();
+            this.Player8Label = new System.Windows.Forms.Label();
+            this.Player7Label = new System.Windows.Forms.Label();
+            this.Player9Label = new System.Windows.Forms.Label();
             this.RoleDisplay = new System.Windows.Forms.Label();
             this.UsernameDisplay = new System.Windows.Forms.Label();
+            this.ElectionTrackerMarker = new System.Windows.Forms.PictureBox();
+            this.PosDisplay = new System.Windows.Forms.PictureBox();
+            this.Player1Pos = new System.Windows.Forms.PictureBox();
+            this.Player2Pos = new System.Windows.Forms.PictureBox();
+            this.Player3Pos = new System.Windows.Forms.PictureBox();
+            this.Player4Pos = new System.Windows.Forms.PictureBox();
+            this.Player5Pos = new System.Windows.Forms.PictureBox();
+            this.Player6Pos = new System.Windows.Forms.PictureBox();
+            this.Player7Pos = new System.Windows.Forms.PictureBox();
+            this.Player8Pos = new System.Windows.Forms.PictureBox();
+            this.Player9Pos = new System.Windows.Forms.PictureBox();
             this.LiberalBoard = new System.Windows.Forms.PictureBox();
             this.FascistBoard = new System.Windows.Forms.PictureBox();
-            this.PlayerTable = new System.Windows.Forms.TableLayoutPanel();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
+            this.StatusMsg = new System.Windows.Forms.Label();
             this.LoginPanel.SuspendLayout();
             this.PlayerListPanel.SuspendLayout();
             this.GamePanel.SuspendLayout();
+            this.PlayerTable.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ElectionTrackerMarker)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PosDisplay)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player1Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player2Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player3Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player4Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player5Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player6Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player7Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player8Pos)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player9Pos)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.LiberalBoard)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FascistBoard)).BeginInit();
-            this.PlayerTable.SuspendLayout();
             this.SuspendLayout();
             // 
             // LoginPanel
@@ -186,6 +209,9 @@ namespace SecretHitlerClient
             // 
             // GamePanel
             // 
+            this.GamePanel.Controls.Add(this.StatusMsg);
+            this.GamePanel.Controls.Add(this.ElectionTrackerMarker);
+            this.GamePanel.Controls.Add(this.PosDisplay);
             this.GamePanel.Controls.Add(this.PlayerTable);
             this.GamePanel.Controls.Add(this.LiberalBoard);
             this.GamePanel.Controls.Add(this.FascistBoard);
@@ -197,6 +223,146 @@ namespace SecretHitlerClient
             this.GamePanel.Size = new System.Drawing.Size(800, 450);
             this.GamePanel.TabIndex = 3;
             this.GamePanel.Visible = false;
+            // 
+            // PlayerTable
+            // 
+            this.PlayerTable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.PlayerTable.AutoSize = true;
+            this.PlayerTable.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.PlayerTable.ColumnCount = 2;
+            this.PlayerTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 86F));
+            this.PlayerTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.PlayerTable.Controls.Add(this.Player6Label, 1, 5);
+            this.PlayerTable.Controls.Add(this.Player1Label, 1, 0);
+            this.PlayerTable.Controls.Add(this.Player2Label, 1, 1);
+            this.PlayerTable.Controls.Add(this.Player3Label, 1, 2);
+            this.PlayerTable.Controls.Add(this.Player4Label, 1, 3);
+            this.PlayerTable.Controls.Add(this.Player5Label, 1, 4);
+            this.PlayerTable.Controls.Add(this.Player8Label, 1, 7);
+            this.PlayerTable.Controls.Add(this.Player7Label, 1, 6);
+            this.PlayerTable.Controls.Add(this.Player9Label, 1, 8);
+            this.PlayerTable.Controls.Add(this.Player1Pos, 0, 0);
+            this.PlayerTable.Controls.Add(this.Player2Pos, 0, 1);
+            this.PlayerTable.Controls.Add(this.Player3Pos, 0, 2);
+            this.PlayerTable.Controls.Add(this.Player4Pos, 0, 3);
+            this.PlayerTable.Controls.Add(this.Player5Pos, 0, 4);
+            this.PlayerTable.Controls.Add(this.Player6Pos, 0, 5);
+            this.PlayerTable.Controls.Add(this.Player7Pos, 0, 6);
+            this.PlayerTable.Controls.Add(this.Player8Pos, 0, 7);
+            this.PlayerTable.Controls.Add(this.Player9Pos, 0, 8);
+            this.PlayerTable.Location = new System.Drawing.Point(699, 91);
+            this.PlayerTable.Name = "PlayerTable";
+            this.PlayerTable.RowCount = 9;
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+            this.PlayerTable.Size = new System.Drawing.Size(92, 261);
+            this.PlayerTable.TabIndex = 4;
+            // 
+            // Player6Label
+            // 
+            this.Player6Label.AutoSize = true;
+            this.Player6Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player6Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player6Label.Location = new System.Drawing.Point(89, 145);
+            this.Player6Label.Name = "Player6Label";
+            this.Player6Label.Size = new System.Drawing.Size(1, 29);
+            this.Player6Label.TabIndex = 6;
+            this.Player6Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player1Label
+            // 
+            this.Player1Label.AutoSize = true;
+            this.Player1Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player1Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player1Label.Location = new System.Drawing.Point(89, 0);
+            this.Player1Label.Name = "Player1Label";
+            this.Player1Label.Size = new System.Drawing.Size(1, 29);
+            this.Player1Label.TabIndex = 8;
+            this.Player1Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player2Label
+            // 
+            this.Player2Label.AutoSize = true;
+            this.Player2Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player2Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player2Label.Location = new System.Drawing.Point(89, 29);
+            this.Player2Label.Name = "Player2Label";
+            this.Player2Label.Size = new System.Drawing.Size(1, 29);
+            this.Player2Label.TabIndex = 1;
+            this.Player2Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player3Label
+            // 
+            this.Player3Label.AutoSize = true;
+            this.Player3Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player3Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player3Label.Location = new System.Drawing.Point(89, 58);
+            this.Player3Label.Name = "Player3Label";
+            this.Player3Label.Size = new System.Drawing.Size(1, 29);
+            this.Player3Label.TabIndex = 2;
+            this.Player3Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player4Label
+            // 
+            this.Player4Label.AutoSize = true;
+            this.Player4Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player4Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player4Label.Location = new System.Drawing.Point(89, 87);
+            this.Player4Label.Name = "Player4Label";
+            this.Player4Label.Size = new System.Drawing.Size(1, 29);
+            this.Player4Label.TabIndex = 3;
+            this.Player4Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player5Label
+            // 
+            this.Player5Label.AutoSize = true;
+            this.Player5Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player5Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player5Label.Location = new System.Drawing.Point(89, 116);
+            this.Player5Label.Name = "Player5Label";
+            this.Player5Label.Size = new System.Drawing.Size(1, 29);
+            this.Player5Label.TabIndex = 4;
+            this.Player5Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player8Label
+            // 
+            this.Player8Label.AutoSize = true;
+            this.Player8Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player8Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player8Label.Location = new System.Drawing.Point(89, 203);
+            this.Player8Label.Name = "Player8Label";
+            this.Player8Label.Size = new System.Drawing.Size(1, 29);
+            this.Player8Label.TabIndex = 7;
+            this.Player8Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player7Label
+            // 
+            this.Player7Label.AutoSize = true;
+            this.Player7Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player7Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player7Label.Location = new System.Drawing.Point(89, 174);
+            this.Player7Label.Name = "Player7Label";
+            this.Player7Label.Size = new System.Drawing.Size(1, 29);
+            this.Player7Label.TabIndex = 5;
+            this.Player7Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // Player9Label
+            // 
+            this.Player9Label.AutoSize = true;
+            this.Player9Label.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player9Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Player9Label.Location = new System.Drawing.Point(89, 232);
+            this.Player9Label.Name = "Player9Label";
+            this.Player9Label.Size = new System.Drawing.Size(1, 29);
+            this.Player9Label.TabIndex = 9;
+            this.Player9Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // RoleDisplay
             // 
@@ -214,15 +380,135 @@ namespace SecretHitlerClient
             // UsernameDisplay
             // 
             this.UsernameDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.UsernameDisplay.AutoSize = true;
             this.UsernameDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.UsernameDisplay.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.UsernameDisplay.Location = new System.Drawing.Point(666, 7);
             this.UsernameDisplay.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.UsernameDisplay.Name = "UsernameDisplay";
-            this.UsernameDisplay.Size = new System.Drawing.Size(125, 24);
+            this.UsernameDisplay.Size = new System.Drawing.Size(119, 24);
             this.UsernameDisplay.TabIndex = 0;
             this.UsernameDisplay.Text = "playername";
             this.UsernameDisplay.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // ElectionTrackerMarker
+            // 
+            this.ElectionTrackerMarker.Image = global::SecretHitlerClient.Properties.Resources.et;
+            this.ElectionTrackerMarker.Location = new System.Drawing.Point(191, 390);
+            this.ElectionTrackerMarker.Name = "ElectionTrackerMarker";
+            this.ElectionTrackerMarker.Size = new System.Drawing.Size(20, 20);
+            this.ElectionTrackerMarker.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.ElectionTrackerMarker.TabIndex = 12;
+            this.ElectionTrackerMarker.TabStop = false;
+            // 
+            // PosDisplay
+            // 
+            this.PosDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.PosDisplay.Location = new System.Drawing.Point(575, 8);
+            this.PosDisplay.Name = "PosDisplay";
+            this.PosDisplay.Size = new System.Drawing.Size(86, 23);
+            this.PosDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.PosDisplay.TabIndex = 11;
+            this.PosDisplay.TabStop = false;
+            // 
+            // Player1Pos
+            // 
+            this.Player1Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player1Pos.Location = new System.Drawing.Point(3, 3);
+            this.Player1Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player1Pos.Name = "Player1Pos";
+            this.Player1Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player1Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player1Pos.TabIndex = 10;
+            this.Player1Pos.TabStop = false;
+            // 
+            // Player2Pos
+            // 
+            this.Player2Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player2Pos.Location = new System.Drawing.Point(3, 32);
+            this.Player2Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player2Pos.Name = "Player2Pos";
+            this.Player2Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player2Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player2Pos.TabIndex = 11;
+            this.Player2Pos.TabStop = false;
+            // 
+            // Player3Pos
+            // 
+            this.Player3Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player3Pos.Location = new System.Drawing.Point(3, 61);
+            this.Player3Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player3Pos.Name = "Player3Pos";
+            this.Player3Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player3Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player3Pos.TabIndex = 12;
+            this.Player3Pos.TabStop = false;
+            // 
+            // Player4Pos
+            // 
+            this.Player4Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player4Pos.Location = new System.Drawing.Point(3, 90);
+            this.Player4Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player4Pos.Name = "Player4Pos";
+            this.Player4Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player4Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player4Pos.TabIndex = 13;
+            this.Player4Pos.TabStop = false;
+            // 
+            // Player5Pos
+            // 
+            this.Player5Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player5Pos.Location = new System.Drawing.Point(3, 119);
+            this.Player5Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player5Pos.Name = "Player5Pos";
+            this.Player5Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player5Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player5Pos.TabIndex = 14;
+            this.Player5Pos.TabStop = false;
+            // 
+            // Player6Pos
+            // 
+            this.Player6Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player6Pos.Location = new System.Drawing.Point(3, 148);
+            this.Player6Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player6Pos.Name = "Player6Pos";
+            this.Player6Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player6Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player6Pos.TabIndex = 15;
+            this.Player6Pos.TabStop = false;
+            // 
+            // Player7Pos
+            // 
+            this.Player7Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player7Pos.Location = new System.Drawing.Point(3, 177);
+            this.Player7Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player7Pos.Name = "Player7Pos";
+            this.Player7Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player7Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player7Pos.TabIndex = 16;
+            this.Player7Pos.TabStop = false;
+            // 
+            // Player8Pos
+            // 
+            this.Player8Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player8Pos.Location = new System.Drawing.Point(3, 206);
+            this.Player8Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player8Pos.Name = "Player8Pos";
+            this.Player8Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player8Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player8Pos.TabIndex = 17;
+            this.Player8Pos.TabStop = false;
+            // 
+            // Player9Pos
+            // 
+            this.Player9Pos.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.Player9Pos.Location = new System.Drawing.Point(3, 235);
+            this.Player9Pos.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.Player9Pos.Name = "Player9Pos";
+            this.Player9Pos.Size = new System.Drawing.Size(83, 23);
+            this.Player9Pos.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Player9Pos.TabIndex = 18;
+            this.Player9Pos.TabStop = false;
             // 
             // LiberalBoard
             // 
@@ -248,134 +534,15 @@ namespace SecretHitlerClient
             this.FascistBoard.TabIndex = 2;
             this.FascistBoard.TabStop = false;
             // 
-            // PlayerTable
+            // StatusMsg
             // 
-            this.PlayerTable.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.PlayerTable.ColumnCount = 2;
-            this.PlayerTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.PlayerTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.PlayerTable.Controls.Add(this.label7, 1, 5);
-            this.PlayerTable.Controls.Add(this.label1, 1, 0);
-            this.PlayerTable.Controls.Add(this.label2, 1, 1);
-            this.PlayerTable.Controls.Add(this.label3, 1, 2);
-            this.PlayerTable.Controls.Add(this.label4, 1, 3);
-            this.PlayerTable.Controls.Add(this.label5, 1, 4);
-            this.PlayerTable.Controls.Add(this.label8, 1, 7);
-            this.PlayerTable.Controls.Add(this.label6, 1, 6);
-            this.PlayerTable.Controls.Add(this.label9, 1, 8);
-            this.PlayerTable.Location = new System.Drawing.Point(554, 77);
-            this.PlayerTable.Name = "PlayerTable";
-            this.PlayerTable.RowCount = 9;
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.PlayerTable.Size = new System.Drawing.Size(237, 268);
-            this.PlayerTable.TabIndex = 4;
-            // 
-            // label2
-            // 
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(121, 29);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 29);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "label2";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label3
-            // 
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(121, 58);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(113, 29);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "label3";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label4
-            // 
-            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(121, 87);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(113, 29);
-            this.label4.TabIndex = 3;
-            this.label4.Text = "label4";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label5
-            // 
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(121, 116);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(113, 29);
-            this.label5.TabIndex = 4;
-            this.label5.Text = "label5";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label6
-            // 
-            this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(121, 174);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(113, 29);
-            this.label6.TabIndex = 5;
-            this.label6.Text = "label6";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label7
-            // 
-            this.label7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(121, 145);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(113, 29);
-            this.label7.TabIndex = 6;
-            this.label7.Text = "label7";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label8
-            // 
-            this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(121, 203);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(113, 29);
-            this.label8.TabIndex = 7;
-            this.label8.Text = "label8";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label1
-            // 
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(121, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(113, 29);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "label1";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label9
-            // 
-            this.label9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(121, 232);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(113, 36);
-            this.label9.TabIndex = 9;
-            this.label9.Text = "label9";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.StatusMsg.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.StatusMsg.BackColor = System.Drawing.Color.LightSalmon;
+            this.StatusMsg.Location = new System.Drawing.Point(670, 379);
+            this.StatusMsg.Name = "StatusMsg";
+            this.StatusMsg.Size = new System.Drawing.Size(121, 61);
+            this.StatusMsg.TabIndex = 13;
+            this.StatusMsg.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // MainForm
             // 
@@ -397,10 +564,24 @@ namespace SecretHitlerClient
             this.PlayerListPanel.ResumeLayout(false);
             this.PlayerListPanel.PerformLayout();
             this.GamePanel.ResumeLayout(false);
+            this.GamePanel.PerformLayout();
+            this.PlayerTable.ResumeLayout(false);
+            this.PlayerTable.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ElectionTrackerMarker)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PosDisplay)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player1Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player2Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player3Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player4Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player5Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player6Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player7Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player8Pos)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Player9Pos)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.LiberalBoard)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.FascistBoard)).EndInit();
-            this.PlayerTable.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -423,15 +604,27 @@ namespace SecretHitlerClient
         private System.Windows.Forms.PictureBox LiberalBoard;
         private System.Windows.Forms.PictureBox FascistBoard;
         private System.Windows.Forms.TableLayoutPanel PlayerTable;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label Player6Label;
+        private System.Windows.Forms.Label Player1Label;
+        private System.Windows.Forms.Label Player2Label;
+        private System.Windows.Forms.Label Player3Label;
+        private System.Windows.Forms.Label Player4Label;
+        private System.Windows.Forms.Label Player5Label;
+        private System.Windows.Forms.Label Player8Label;
+        private System.Windows.Forms.Label Player7Label;
+        private System.Windows.Forms.Label Player9Label;
+        private System.Windows.Forms.PictureBox Player1Pos;
+        private System.Windows.Forms.PictureBox Player2Pos;
+        private System.Windows.Forms.PictureBox Player3Pos;
+        private System.Windows.Forms.PictureBox Player4Pos;
+        private System.Windows.Forms.PictureBox Player5Pos;
+        private System.Windows.Forms.PictureBox Player6Pos;
+        private System.Windows.Forms.PictureBox Player7Pos;
+        private System.Windows.Forms.PictureBox Player8Pos;
+        private System.Windows.Forms.PictureBox Player9Pos;
+        private System.Windows.Forms.PictureBox PosDisplay;
+        private System.Windows.Forms.PictureBox ElectionTrackerMarker;
+        private System.Windows.Forms.Label StatusMsg;
     }
 }
 

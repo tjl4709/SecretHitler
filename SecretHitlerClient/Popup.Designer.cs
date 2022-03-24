@@ -36,7 +36,6 @@ namespace SecretHitlerClient
             // 
             // ImageFlowPanel
             // 
-            this.ImageFlowPanel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ImageFlowPanel.AutoSize = true;
             this.ImageFlowPanel.Location = new System.Drawing.Point(10, 27);
             this.ImageFlowPanel.Name = "ImageFlowPanel";
@@ -45,7 +44,6 @@ namespace SecretHitlerClient
             // 
             // Caption
             // 
-            this.Caption.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.Caption.AutoSize = true;
             this.Caption.Location = new System.Drawing.Point(55, 85);
             this.Caption.Name = "Caption";
@@ -97,10 +95,9 @@ namespace SecretHitlerClient
         }
 
         #endregion
-
-        private System.Windows.Forms.FlowLayoutPanel ImageFlowPanel;
-        private System.Windows.Forms.Label Caption;
         private System.Windows.Forms.Label Title;
         public System.Windows.Forms.Label CloseButton;
+        public System.Windows.Forms.Label Caption;
+        public System.Windows.Forms.FlowLayoutPanel ImageFlowPanel;
     }
 }

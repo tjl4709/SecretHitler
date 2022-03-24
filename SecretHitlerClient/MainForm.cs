@@ -22,14 +22,21 @@ namespace SecretHitlerClient
         List<string> m_players;
         bool m_vip;
         Role m_role;
-        Popup m_popup;
+        Thread m_popHand;
+        Queue<Popup> m_popups;
+        Popup m_currPop;
         PictureBox[] m_libPols, m_fascPols;
-        string m_pres, m_chanc;
+        string m_pres, m_chanc, m_lastPres, m_lastChanc;
+        int m_electTrack, m_nLibPol, m_nFascPol;
+        Bitmap[] m_vetoed;
 
         public MainForm(string[] args = null)
         {
             m_vip = false;
+            m_electTrack = 0;
             m_players = new List<string>(10);
+            m_popups = new Queue<Popup>();
+            m_popHand = new Thread(OpenPopups);
             InitializeComponent();
             UsernameDisplay.Text = "";
             //add policy picture boxes
@@ -55,7 +62,6 @@ namespace SecretHitlerClient
                 m_fascPols[i].BringToFront();
             }
             GamePanel.Controls.AddRange(m_fascPols);
-            MainForm_Resize(this, EventArgs.Empty);
             //parse args
             if (args != null && args.Length > 0) {
                 int i;
@@ -95,17 +101,81 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.Start: {
+                        m_electTrack = m_nLibPol = m_nFascPol = 0;
                         m_role = (Role)cmd[1];
                         OpenRolePopup();
+                        if (!m_popHand.IsAlive) m_popHand.Start();
                         PlayerListToGame();
                         break;
                     }
+                    case Command.PosAssign: {
+                        m_lastPres = m_pres;
+                        m_pres = Parser.ToString(cmd);
+                        UpdatePlayerTable();
+                        if (m_pres == UsernameDisplay.Text) {
+                            OpenNominatePopup();
+                            PosDisplay.Image = Resources.pres;
+                        } else PosDisplay.Image = null;
+                        break;
+                    }
+                    case Command.Vote: {
+                        m_lastChanc = m_chanc;
+                        m_chanc = Parser.ToString(cmd);
+                        if (m_chanc == UsernameDisplay.Text)
+                            PosDisplay.Image = Resources.chanc;
+                        UpdatePlayerTable();
+                        OpenVotePopup();
+                        break;
+                    }
+                    case Command.VoteCnt: {
+                        if (cmd[1] > (m_players.Count + 1) / 2) {
+                            m_electTrack = 0;
+                            UpdateStatusMsg("The vote passed.", Color.Black);
+                        } else {
+                            m_electTrack++;
+                            m_pres = m_lastPres;
+                            m_chanc = m_lastChanc;
+                            UpdateStatusMsg("The vote failed.", Color.Black);
+                        }
+                        MainForm_Resize(this, EventArgs.Empty);
+                        break;
+                    }
+                    case Command.Policy: {
+                        if (cmd.Length == 4) {
+                            if (m_pres == UsernameDisplay.Text) {
+                                OpenPolicyPopup(cmd);
+                            } else ci.Send(Parser.ErrMsg("I'm not the President"));
+                        } else if (cmd.Length == 3) {
+                            if (m_chanc == UsernameDisplay.Text) {
+                                OpenPolicyPopup(cmd);
+                            } else ci.Send(Parser.ErrMsg("I'm not the Chancellor"));
+                        } else {
+                            if ((Role)cmd[1] == Role.Liberal) {
+                                m_libPols[m_nLibPol++].Visible = true;
+                                UpdateStatusMsg("A Liberal policy has been enacted", Color.Black);
+                            } else {
+                                m_fascPols[m_nFascPol++].Visible = true;
+                                UpdateStatusMsg("A Fascist policy has been enacted", Color.Black);
+                            }
+                            m_electTrack = 0;
+                            MainForm_Resize(this, EventArgs.Empty);
+                        }
+                        break;
+                    }
+                    //FascPow
+                    //Winner
                     case Command.VIP:
                         m_vip = true;
                         ShowVIP();
                         break;
+                    case Command.General:
+                        UpdateStatusMsg(Parser.ToString(cmd), Color.Black);
+                        break;
+                    case Command.Error:
+                        UpdateStatusMsg(Parser.ToString(cmd), Color.Red);
+                        break;
                     default:
-                        ci.Send(Parser.ErrMsg("Unrecognized command: " + cmd[0].ToString("X")));
+                        ci.Send(Parser.ErrMsg("Unrecognized command: 0x" + cmd[0].ToString("X")));
                         break;
                 }
             }
@@ -114,16 +184,21 @@ namespace SecretHitlerClient
         private void MainForm_Resize(object sender, EventArgs e)
         {
             //resize boards
-            FascistBoard.Height += GamePanel.Height / 2 - FascistBoard.Bottom;
+            FascistBoard.Height = GamePanel.Height / 2 - 10;
             FascistBoard.Width = (int)Math.Round((double)FascistBoard.Height * LiberalBoard.Image.Width / LiberalBoard.Image.Height);
+            if (FascistBoard.Right > Math.Min(PosDisplay.Left, PlayerTable.Left) - FascistBoard.Left) {
+                FascistBoard.Width = Math.Min(PosDisplay.Left, PlayerTable.Left) - 2 * FascistBoard.Left;
+                FascistBoard.Height = (int)Math.Round((double)FascistBoard.Width * LiberalBoard.Image.Height / LiberalBoard.Image.Width);
+            }
+            FascistBoard.Location = new Point(FascistBoard.Left, GamePanel.Height / 2 - FascistBoard.Height);
             LiberalBoard.Height = FascistBoard.Height;
             LiberalBoard.Width = FascistBoard.Width;
             LiberalBoard.Location = new Point(FascistBoard.Left, FascistBoard.Bottom);
             FascistBoard.SendToBack();
             LiberalBoard.SendToBack();
             //recenter popup
-            if (m_popup != null)
-                m_popup.Location = new Point((GamePanel.Width - m_popup.Width) / 2, (GamePanel.Height - m_popup.Height) / 2);
+            if (m_currPop != null)
+                m_currPop.Location = new Point((GamePanel.Width - m_currPop.Width) / 2, (GamePanel.Height - m_currPop.Height) / 2);
             //resize and align policies
             double hFrac = 0.46;
             for (int i = 0; i < m_libPols.Length; i++) {
@@ -138,10 +213,15 @@ namespace SecretHitlerClient
                 m_fascPols[i].Location = new Point((int)Math.Round(FascistBoard.Left + (0.108 + 0.1348*i) * FascistBoard.Width),
                     FascistBoard.Top + (int)Math.Round((1 - hFrac) / 2 * FascistBoard.Height));
             }
+            //resize and align election tracker
+            ElectionTrackerMarker.Width = ElectionTrackerMarker.Height = (int)Math.Round(0.101 * LiberalBoard.Height);
+            ElectionTrackerMarker.Location = new Point(LiberalBoard.Left + (int)Math.Round((0.337 + 0.091 * m_electTrack)
+                * LiberalBoard.Width), LiberalBoard.Top + (int)Math.Round(0.764 * LiberalBoard.Height));
         }
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (m_ci != null) m_ci.Close();
+            if (m_popHand.IsAlive) m_popHand.Abort();
         }
 
         //popups
@@ -149,37 +229,90 @@ namespace SecretHitlerClient
         {
             string title = "Party Membership and Secret Role";
             if (m_role == Role.Liberal)
-                OpenPopup("You are a Liberal. Enact 5 Liberal policies or execute Hitler.",
-                    title, new Bitmap[] { Resources.lpm, Resources.lsr });
+                m_popups.Enqueue(new Popup("You are a Liberal. Enact 5 Liberal policies or execute Hitler.",
+                    title, new Bitmap[] { Resources.lpm, Resources.lsr }));
             else
-                OpenPopup("You are a Fascist. Enact 6 Fascist policies or elect Hitler as" +
+                m_popups.Enqueue(new Popup("You are a Fascist. Enact 6 Fascist policies or elect Hitler as" +
                     " Chancellor after enacting 3 Fascist policies", title, new Bitmap[]
-                    { Resources.fpm, m_role==Role.Fascist ? Resources.fsr : Resources.hsr});
+                    { Resources.fpm, m_role==Role.Fascist ? Resources.fsr : Resources.hsr}));
         }
-        private void OpenPopup(string caption, string title, Bitmap[] imgs)
+        private void OpenNominatePopup()
         {
-            if (InvokeRequired) {
-                Invoke(new Action(() => OpenPopup(caption, title, imgs)));
-                return;
+            List<string> nominees = new List<string>(m_players);
+            nominees.Remove(m_lastPres);
+            nominees.Remove(m_lastChanc);
+            FlowLayoutPanel radios = new FlowLayoutPanel() {
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+            for (int i = 0; i < nominees.Count; i++)
+                radios.Controls.Add(new RadioButton() { Text = nominees[i] });
+            Button nominateBtn = new Button() {
+                Text = "Nominate",
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Margin = new Padding(0)
+            };
+            nominateBtn.Click += NominateButton_Click;
+            m_popups.Enqueue(new Popup("Choose a player to nominate as Chancellor:", "Chancellor Nomination", radios, nominateBtn));
+        }
+        private void OpenVotePopup()
+        {
+            Popup popup = new Popup("Vote for Chancellor election", $"{m_pres} nominated {m_chanc} for Chancellor",
+                new Bitmap[] { Resources.nein, Resources.ja }, false);
+            popup.ImageClick = VoteImage_Click;
+            m_popups.Enqueue(popup);
+        }
+        private void OpenPolicyPopup(byte[] cmd)
+        {
+            List<Bitmap> imgs = new List<Bitmap>();
+            for (int i = 1; i < cmd.Length; i++)
+                imgs.Add((Role)cmd[i] == Role.Liberal ? Resources.lpol : Resources.fpol);
+            Popup popup;
+            if (cmd.Length == 3) {
+                Button vetoBtn = null;
+                if (m_vetoed != null) {
+                    imgs.Clear();
+                    imgs.AddRange(m_vetoed);
+                    m_vetoed = null;
+                } else if (m_nFascPol >= 5) {
+                    vetoBtn = new Button() {
+                        Text = "Veto",
+                        AutoSize = true,
+                        AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                        Margin = new Padding(0)
+                    };
+                    vetoBtn.Click += VetoButton_Click;
+                }
+                popup = new Popup("Choose a policy to enact", "Legislative Session", imgs, vetoBtn);
+            } else 
+                popup = new Popup("Choose a policy to discard", "Legislative Session", imgs.ToArray(), false);
+            popup.ImageClick = PolicyImage_Click;
+            m_popups.Enqueue(popup);
+        }
+        private void OpenPopups()
+        {
+            while (true) {
+                while (m_popups.Count == 0 || m_currPop != null) Thread.Sleep(500);
+                m_currPop = m_popups.Dequeue();
+                m_currPop.CloseButton.Click += ClosePopup;
+                m_currPop.AdjustSize();
+                m_currPop.Location = new Point((GamePanel.Width - m_currPop.Width) / 2, (GamePanel.Height - m_currPop.Height) / 2);
+                Invoke(new Action(() => Controls.Add(m_currPop)));
+                m_currPop.Show();
             }
-            while (m_popup != null) Thread.Sleep(500);
-            m_popup = new Popup(caption, title, imgs);
-            m_popup.CloseButton.Click += ClosePopup;
-            m_popup.AdjustSize();
-            m_popup.Location = new Point((GamePanel.Width - m_popup.Width) / 2, (GamePanel.Height - m_popup.Height) / 2);
-            Controls.Add(m_popup);
-            m_popup.Show();
         }
         private void ClosePopup(object sender, EventArgs e)
         {
-            if (m_popup.InvokeRequired) {
-                Invoke(new Action(() => Controls.Remove(m_popup)));
-                m_popup.Invoke(new MethodInvoker(m_popup.Dispose));
+            if (m_currPop.InvokeRequired) {
+                Invoke(new Action(() => Controls.Remove(m_currPop)));
+                m_currPop.Invoke(new MethodInvoker(m_currPop.Dispose));
             } else {
-                Controls.Remove(m_popup);
-                m_popup.Dispose();
+                Controls.Remove(m_currPop);
+                m_currPop.Dispose();
             }
-            m_popup = null;
+            m_currPop = null;
         }
 
         //panel transitions
@@ -202,13 +335,16 @@ namespace SecretHitlerClient
             }
             PlayerListPanel.Hide();
             RoleDisplay.Text = m_role.ToString();
+            UsernameDisplay.Location = new Point(RoleDisplay.Right - UsernameDisplay.Width, UsernameDisplay.Top);
+            PosDisplay.Location = new Point(UsernameDisplay.Left - PosDisplay.Width, PosDisplay.Top);
             //choose fascist board
-            if (m_players.Count < 7) FascistBoard.Image = Properties.Resources.fb5;
-            else if (m_players.Count < 9) FascistBoard.Image = Properties.Resources.fb7;
-            else FascistBoard.Image = Properties.Resources.fb9;
+            if (m_players.Count < 7) FascistBoard.Image = Resources.fb5;
+            else if (m_players.Count < 9) FascistBoard.Image = Resources.fb7;
+            else FascistBoard.Image = Resources.fb9;
             //setup PlayerTable
             m_players.Remove(UsernameDisplay.Text);
             UpdatePlayerTable();
+            MainForm_Resize(this, EventArgs.Empty);
             GamePanel.Show();
         }
         //update UI elements
@@ -297,7 +433,6 @@ namespace SecretHitlerClient
             PlayerListBox.Items.Clear();
             PlayerListBox.Items.AddRange(m_players.ToArray());
         }
-
         private void StartButton_Click(object sender, EventArgs e)
         {
             if (StartButton.Text == "Start") {
@@ -312,10 +447,73 @@ namespace SecretHitlerClient
                 PlayerTable.Invoke(new MethodInvoker(UpdatePlayerTable));
                 return;
             }
-            PlayerTable.RowCount = m_players.Count;
-            for (int i = 0; i < m_players.Count; i++) {
-                PlayerTable.SetCellPosition(new Label() { Text = m_players[i] }, new TableLayoutPanelCellPosition(1, i));
+            int i;
+            for (i = 0; i < m_players.Count; i++) {
+                PlayerTable.GetControlFromPosition(1, i).Text = m_players[i];
+                ((PictureBox)PlayerTable.GetControlFromPosition(0, i)).Image =
+                    m_players[i] == m_pres ? Resources.pres : m_players[i] == m_chanc ? Resources.chanc : null;
             }
+            for (; i < PlayerTable.RowCount; i++) {
+                PlayerTable.GetControlFromPosition(1, i).Text = "";
+                ((PictureBox)PlayerTable.GetControlFromPosition(0, i)).Image = null;
+            }
+        }
+        private void UpdateStatusMsg(string text, Color txtCol)
+        {
+            if (StatusMsg.InvokeRequired) {
+                StatusMsg.Invoke(new Action(() => StatusMsg.Text = text));
+                StatusMsg.Invoke(new Action(() => StatusMsg.ForeColor = txtCol));
+            } else {
+                StatusMsg.Text = text;
+                StatusMsg.ForeColor = txtCol;
+            }
+        }
+        private void NominateButton_Click(object sender, EventArgs e)
+        {
+            if (m_currPop.InvokeRequired) {
+                m_currPop.Invoke(new Action(() => NominateButton_Click(sender, e)));
+                return;
+            }
+            string chanc = null;
+            FlowLayoutPanel radios = (FlowLayoutPanel)m_currPop.InsertCtrl;
+            for (int i = 0; i < radios.Controls.Count; i++)
+                if (radios.Controls[i] is RadioButton rb && rb.Checked) {
+                    chanc = rb.Text;
+                    break;
+                }
+            if (chanc == null) {
+                m_currPop.Caption.ForeColor = Color.Red;
+            } else {
+                ClosePopup(sender, e);
+                m_ci.Send(Parser.ToBytes(Command.PosAssign, chanc));
+            }
+        }
+        private void VoteImage_Click(object sender, EventArgs e)
+        {
+            if (sender is Control ctrl && m_currPop.ImageFlowPanel.Controls.Contains(ctrl)) {
+                m_ci.Send(new byte[] { 2, (byte)Command.Vote, (byte)m_currPop.ImageFlowPanel.Controls.IndexOf(ctrl) });
+                ClosePopup(sender, e);
+            }
+        }
+        private void PolicyImage_Click(object sender, EventArgs e)
+        {
+            if (sender is PictureBox pb) {
+                if (pb.Image == Resources.fpol)
+                    m_ci.Send(new byte[] { 2, (byte)Command.Policy, (byte)Role.Fascist });
+                else if (pb.Image == Resources.lpol)
+                    m_ci.Send(new byte[] { 2, (byte)Command.Policy, (byte)Role.Liberal });
+                else return;
+                ClosePopup(sender, e);
+            }
+        }
+        private void VetoButton_Click(object sender, EventArgs e)
+        {
+            if (m_chanc == UsernameDisplay.Text) {
+                m_vetoed = new Bitmap[] { (Bitmap)((PictureBox)m_currPop.ImageFlowPanel.Controls[0]).Image,
+                    (Bitmap)((PictureBox)m_currPop.ImageFlowPanel.Controls[1]).Image };
+                m_ci.Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
+            } else if (m_pres == UsernameDisplay.Text && sender is Control ctrl && m_currPop.InsertCtrl.Controls.Contains(ctrl))
+                m_ci.Send(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, (byte)(ctrl.Text == "Accept" ? 1 : 0) });
         }
     }
 }

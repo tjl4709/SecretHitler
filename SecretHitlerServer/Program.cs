@@ -115,6 +115,7 @@ namespace SecretHitlerServer
                                     m_game.NextPrezResult(m_proCnt > m_voteCnt / 2);
                                     Console.WriteLine("The vote " + (m_proCnt > m_voteCnt / 2 ? "passed" : "failed"));
                                     if (m_proCnt > m_voteCnt / 2) {
+                                        m_electTrack = 0;
                                         m_game.Chancellor = m_nextChanc;
                                         if (m_game.Winner != Role.None) {
                                             m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
@@ -226,7 +227,7 @@ namespace SecretHitlerServer
                         Console.WriteLine("Received error: " + Parser.ToString(cmd));
                         break;
                     default:
-                        ci.Send(Parser.ErrMsg("Unrecognized command: " + cmd[0].ToString("X")));
+                        ci.Send(Parser.ErrMsg("Unrecognized command: 0x" + cmd[0].ToString("X")));
                         break;
                 }
             }

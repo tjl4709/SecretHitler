@@ -73,6 +73,16 @@ namespace SecretHitlerClient.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap et {
+            get {
+                object obj = ResourceManager.GetObject("et", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap fb5 {
             get {
                 object obj = ResourceManager.GetObject("fb5", resourceCulture);
