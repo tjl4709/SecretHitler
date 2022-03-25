@@ -52,10 +52,11 @@ namespace SecretHitlerClient
             if (button != null)
                 Controls.Add(m_insertBtn = button);
         }
-        public Popup(string caption, string title, Control control, Button button) : this(caption, title)
+        public Popup(string caption, string title, Control control, Button button = null) : this(caption, title)
         {
             Controls.Add(InsertCtrl = control);
-            Controls.Add(m_insertBtn = button);
+            if (button != null)
+                Controls.Add(m_insertBtn = button);
             CloseButton.Visible = false;
         }
 
@@ -72,16 +73,16 @@ namespace SecretHitlerClient
             //caption
             if (Caption.Text.Length > 0) {
                 int i = 0, j, k;
-                Caption.Text = Caption.Text.Replace('\n', ' ');
-                while (i < Caption.Text.Length) {
-                    j = i;
-                    while ((k = Caption.Text.IndexOf(' ', j+1)) - i < MAX_CHAR_LN && k != -1)
-                        j = k;
-                    if (k == -1) break;
-                    if (k - i > MAX_CHAR_LN && j != 0)
-                        Caption.Text = Caption.Text.Remove(j, 1).Insert(j, "\n");
-                    i = j;
-                }
+                if (!Caption.Text.Contains('\n'))
+                    while (i < Caption.Text.Length) {
+                        j = i;
+                        while ((k = Caption.Text.IndexOf(' ', j+1)) - i < MAX_CHAR_LN && k != -1)
+                            j = k;
+                        if (k == -1) break;
+                        if (k - i > MAX_CHAR_LN && j != 0)
+                            Caption.Text = Caption.Text.Remove(j, 1).Insert(j, "\n");
+                        i = j;
+                    }
                 Width = Math.Max(Width, Caption.Width + 10);
                 Caption.Location = new Point((Width - Caption.Width) / 2, height + 5);
                 height = Caption.Bottom;

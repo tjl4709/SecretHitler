@@ -15,10 +15,10 @@ namespace SecretHitlerUtilities
             get { return m_parties.ElementAt(m_nextPrezIdx).Key; }
             set {
                 if (m_parties.ContainsKey(value)) {
-                    System.Collections.IEnumerator keys = m_parties.Keys.GetEnumerator();
-                    for (m_nextPrezIdx = 0; m_nextPrezIdx < m_parties.Count; m_nextPrezIdx++, keys.MoveNext())
-                        if ((string)keys.Current == value)
-                            break;
+                    m_nextPrezIdx = 0;
+                    foreach (string key in m_parties.Keys)
+                        if (key != value) m_nextPrezIdx++;
+                        else break;
                 }
             }
         }
@@ -41,6 +41,8 @@ namespace SecretHitlerUtilities
         public Role Winner;
 
         private Dictionary<string, Role> m_parties;
+        public Dictionary<string, Role>.KeyCollection LivingPlayers { get { return m_parties.Keys; } }
+
         private List<Role> draw, discard;
         private Random rand;
 

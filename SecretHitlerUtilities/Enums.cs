@@ -36,7 +36,7 @@ namespace SecretHitlerUtilities
         InvestigateLoyalty=1, //to server FB playername, response to client FB playerrole
         SpecialElection  = 2, //to server FB playername
         PolicyPeek       = 3, //to client FB next three policies
-        Execution        = 4, //to server FB playername
+        Execution        = 4, //to server FB playername, braodcast to clients
         Veto             = 5  //to server from chanc, to pres, from pres FB T/F, to chanc FB T/F
     }
 }
