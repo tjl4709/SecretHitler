@@ -183,6 +183,10 @@ namespace SecretHitlerClient
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
+            if (InvokeRequired) {
+                Invoke(new Action(() => MainForm_Resize(sender, e)));
+                return;
+            }
             //resize boards
             FascistBoard.Height = GamePanel.Height / 2 - 10;
             FascistBoard.Width = (int)Math.Round((double)FascistBoard.Height * LiberalBoard.Image.Width / LiberalBoard.Image.Height);

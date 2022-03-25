@@ -1,0 +1,3 @@
+show Fascists list of other Fascists at start of game
+test and fix Policy command
+implement FascPow and Winner commands
