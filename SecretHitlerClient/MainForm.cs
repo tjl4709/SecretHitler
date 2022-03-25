@@ -37,8 +37,6 @@ namespace SecretHitlerClient
             m_players = new List<string>(10);
             m_popups = new Queue<Popup>();
             m_popHand = new Thread(OpenPopups);
-            InitializeComponent();
-            UsernameDisplay.Text = "";
             //add policy picture boxes
             m_libPols = new PictureBox[5];
             for (int i = 0; i < m_libPols.Length; i++) {
@@ -50,7 +48,6 @@ namespace SecretHitlerClient
                 };
                 m_libPols[i].BringToFront();
             }
-            GamePanel.Controls.AddRange(m_libPols);
             m_fascPols = new PictureBox[6];
             for (int i = 0; i < m_fascPols.Length; i++) {
                 m_fascPols[i] = new PictureBox() {
@@ -61,7 +58,10 @@ namespace SecretHitlerClient
                 };
                 m_fascPols[i].BringToFront();
             }
+            InitializeComponent();
+            GamePanel.Controls.AddRange(m_libPols);
             GamePanel.Controls.AddRange(m_fascPols);
+            UsernameDisplay.Text = "";
             //parse args
             if (args != null && args.Length > 0) {
                 int i;
@@ -330,11 +330,12 @@ namespace SecretHitlerClient
             StartButton.Visible = m_vip;
             PlayerListPanel.Show();
             UsernameDisplay.Text = UsernameEdit.Text;
+            UsernameDisplay.Location = new Point(RoleDisplay.Right - UsernameDisplay.Width, UsernameDisplay.Top);
         }
         private void PlayerListToGame()
         {
             if (InvokeRequired) {
-                Invoke(new Action(PlayerListToGame));
+                Invoke(new MethodInvoker(PlayerListToGame));
                 return;
             }
             PlayerListPanel.Hide();
@@ -502,9 +503,9 @@ namespace SecretHitlerClient
         private void PolicyImage_Click(object sender, EventArgs e)
         {
             if (sender is PictureBox pb) {
-                if (pb.Image == Resources.fpol)
+                if (pb.Image.Equals(Resources.fpol))
                     m_ci.Send(new byte[] { 2, (byte)Command.Policy, (byte)Role.Fascist });
-                else if (pb.Image == Resources.lpol)
+                else if (pb.Image.Equals(Resources.lpol))
                     m_ci.Send(new byte[] { 2, (byte)Command.Policy, (byte)Role.Liberal });
                 else return;
                 ClosePopup(sender, e);
