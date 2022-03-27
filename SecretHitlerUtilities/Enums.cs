@@ -10,17 +10,18 @@ namespace SecretHitlerUtilities
 {
     public enum Command : byte
     {
-        Name    = 0x01, //to server FB new playername, to client FB T/F then connected playernames
-        Start   = 0x02, //to server means start the game, to client FB role
-        PosAssign=0x03, //to client FB playername for P, to server FB playername for C
-        Vote    = 0x04, //to client FB playername for C, to server FB bool
-        VoteCnt = 0x05, //FB number of 'yes' votes
-        Policy  = 0x06, //FB policy choices List<L/F>
-        FascPow = 0x07, //FB FascistPower
-        Winner  = 0x08, //FB L/F
-        VIP     = 0x09, //to client means they are VIP
-        General = 0xFE, //FB message
-        Error   = 0xFF  //FB message
+        Name     = 0x01, //to server FB new playername, to client FB T/F then connected playernames
+        Start    = 0x02, //to server means start the game, to client FB role
+        PosAssign= 0x03, //to client FB playername for P, to server FB playername for C
+        Vote     = 0x04, //to client FB playername for C, to server FB bool
+        VoteCnt  = 0x05, //FB number of 'yes' votes
+        Policy   = 0x06, //FB policy choices List<L/F>
+        FascPow  = 0x07, //FB FascistPower
+        Winner   = 0x08, //FB L/F
+        VIP      = 0x09, //to client means they are VIP
+        Disconnect=0xFD, //to client FB playername that disconnected
+        General  = 0xFE, //FB message
+        Error    = 0xFF  //FB message
     }
     public enum Role : byte
     {

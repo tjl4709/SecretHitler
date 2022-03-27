@@ -125,8 +125,12 @@ namespace SecretHitlerUtilities
         {
             if (!m_parties.ContainsKey(player))
                 return false;
+            string nextPres = NextPrez;
             bool isHitler = m_parties[player] == Role.Hitler;
             m_parties.Remove(player);
+            if (nextPres != player)
+                NextPrez = nextPres;
+            else m_nextPrezIdx %= NumAlive;
             if (isHitler) Winner = Role.Liberal;
             return isHitler;
         }

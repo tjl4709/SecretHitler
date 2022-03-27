@@ -13,6 +13,7 @@ namespace SecretHitlerClient
     public partial class Popup : UserControl
     {
         public override string Text { get => Caption.Text; set => Caption.Text = value; }
+        public string TitleText => Title.Text;
         public EventHandler ImageClick { set { for (int i = 0; i < ImageFlowPanel.Controls.Count; i++) ImageFlowPanel.Controls[i].Click += value; } }
         private const int MAX_IMG_SZ = 200, MAX_CHAR_LN = 60;
         public readonly Control InsertCtrl;
@@ -58,6 +59,10 @@ namespace SecretHitlerClient
             if (button != null)
                 Controls.Add(m_insertBtn = button);
             CloseButton.Visible = false;
+        }
+        public Popup(string caption, string title, Control control, bool closeable) : this(caption, title, control)
+        {
+            CloseButton.Visible = closeable;
         }
 
         public void AdjustSize()
