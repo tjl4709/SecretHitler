@@ -91,6 +91,8 @@ namespace SecretHitlerUtilities
             }
             return drew;
         }
+        public void Discard(List<Role> cards)
+        { for (int i = 0; i < cards.Count; i++) Discard(cards[i]); }
         public void Discard(Role card)
         {
             if (card == Role.Liberal || card == Role.Fascist)
@@ -120,7 +122,8 @@ namespace SecretHitlerUtilities
         }
 
         public bool Contains(string player) { return m_parties.ContainsKey(player); }
-        public Role GetRole(string player) { if (m_parties.ContainsKey(player)) return m_parties[player]; else return Role.None; }
+        public Role GetRole(string player)
+        { if (m_parties.ContainsKey(player)) return m_parties[player]; else return Role.None; }
         public bool Kill(string player)
         {
             if (!m_parties.ContainsKey(player))
@@ -130,7 +133,8 @@ namespace SecretHitlerUtilities
             m_parties.Remove(player);
             if (nextPres != player)
                 NextPrez = nextPres;
-            else m_nextPrezIdx %= NumAlive;
+            else if (NumAlive > 0)
+                m_nextPrezIdx %= NumAlive;
             if (isHitler) Winner = Role.Liberal;
             return isHitler;
         }

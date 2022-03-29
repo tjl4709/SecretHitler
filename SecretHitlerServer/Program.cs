@@ -70,11 +70,14 @@ namespace SecretHitlerServer
                             m_clients.Add(name, ci);
                             if (m_players.Count > 0)
                                 ci.Send(Parser.ToBytes(Command.Name, string.Join(",", m_players)));
-                            if (m_game == null && m_players.Count < 10) {
+                            if (m_players.Count < 10) {
                                 m_players.Add(name);
                                 Console.WriteLine(name + " has joined the game");
                                 m_server.Broadcast(Parser.ToBytes(Command.Name, name));
                             }
+                            if (m_game != null)
+                                ci.Send(Parser.UpdateToBytes(m_game.NumLiberalPolicies,
+                                    m_game.NumFascistPolicies, m_game.President, m_game.Chancellor));
                         }
                         break;
                     }
@@ -115,7 +118,6 @@ namespace SecretHitlerServer
                                     m_game.NextPrezResult(m_proCnt > m_voteCnt / 2);
                                     Console.WriteLine("The vote " + (m_proCnt > m_voteCnt / 2 ? "passed" : "failed"));
                                     if (m_proCnt > m_voteCnt / 2) {
-                                        m_electTrack = 0;
                                         m_game.Chancellor = m_nextChanc;
                                         if (!SendWinner("Hitler was elected Chancellor after 3 Fascist policies and the Fascists have won!")) {
                                             if (m_policies == null || m_policies.Count < 3)
@@ -137,6 +139,7 @@ namespace SecretHitlerServer
                                     m_game.Discard((Role)cmd[1]);
                                     m_clients[m_game.Chancellor].Send(new byte[] { 3, (byte)Command.Policy, (byte)m_policies[0], (byte)m_policies[1] });
                                 } else {
+                                    m_electTrack = 0;
                                     Console.WriteLine("A " + (Role)cmd[1] + " ploicy was enacted.");
                                     m_server.Broadcast(new byte[] { 2, (byte)Command.Policy, cmd[1] });
                                     m_game.Discard(m_policies[0]);
@@ -171,8 +174,11 @@ namespace SecretHitlerServer
                                     m_server.Broadcast(Parser.ToBytes(Command.General, msg));
                                     m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
                                 } else if ((string)ci.Data == m_game.President) {
-                                    if (cmd[2] == 1) msg = "The President has accepted the veto";
-                                    else msg = "The President has denied the veto";
+                                    if (cmd[2] == 1) {
+                                        msg = "The President has accepted the veto";
+                                        m_game.Discard(m_policies);
+                                        m_policies.Clear();
+                                    } else msg = "The President has denied the veto";
                                     Console.WriteLine(msg + '.');
                                     m_server.Broadcast(Parser.ToBytes(Command.General, msg));
                                     m_server.Broadcast(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, cmd[2] });
@@ -252,8 +258,7 @@ namespace SecretHitlerServer
         }
         static void IncElectTrack()
         {
-            m_electTrack++;
-            if (m_electTrack >= 3) {
+            if (++m_electTrack >= 3) {
                 m_electTrack = 0;
                 Role policy= m_game.Draw(1)[0];
                 if (m_policies != null && m_policies.Count > 0) {
@@ -314,7 +319,6 @@ namespace SecretHitlerServer
                         Console.WriteLine("Hitler has left so the Liberals win.");
                     } else m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected"));
                 }
-            } else {
                 foreach (string key in m_clients.Keys)
                     if (m_players.Count >= 10)
                         break;

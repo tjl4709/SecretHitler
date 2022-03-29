@@ -16,9 +16,10 @@ namespace SecretHitlerUtilities
         public static byte[] FascPowToBytes(FascistPowers pow, string msg)
         { return ToBytes(Command.FascPow, (char)pow + msg); }
 
+        public static byte[] UpdateToBytes(int numLibPol, int numFascPol, string pres, string chanc)
+        { return ToBytes(Command.Update, $"{(byte)numLibPol}{(byte)numFascPol}{pres},{chanc}"); }
+
         public static string ToString(byte[] bytes, int startIdx = 1)
-        {
-            return new string(Array.ConvertAll(bytes, Convert.ToChar)).Substring(startIdx);
-        }
+        { return new string(Array.ConvertAll(bytes, Convert.ToChar)).Substring(startIdx); }
     }
 }

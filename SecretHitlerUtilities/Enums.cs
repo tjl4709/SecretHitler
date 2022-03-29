@@ -19,6 +19,7 @@ namespace SecretHitlerUtilities
         FascPow  = 0x07, //FB FascistPower
         Winner   = 0x08, //FB L/F
         VIP      = 0x09, //to client means they are VIP
+        Update   = 0xFC, //to client when joining during game FB num lib pol, num fasc pol, curr pres, curr chanc (audience role implied)
         Disconnect=0xFD, //to client FB playername that disconnected
         General  = 0xFE, //FB message
         Error    = 0xFF  //FB message

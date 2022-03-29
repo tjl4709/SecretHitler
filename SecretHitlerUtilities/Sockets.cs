@@ -882,7 +882,11 @@ namespace RedCorona.Net {
 		}
 
 		public void Broadcast(byte[] bytes){
-			lock(SyncRoot) foreach(ClientInfo ci in Clients) ci.Send(bytes);
+			try {
+				lock (SyncRoot) foreach (ClientInfo ci in Clients) ci.Send(bytes);
+			} catch (Exception e) {
+				if (clients.Count > 0) throw e;
+            }
 		}
 
 		public void BroadcastMessage(uint code, byte[] bytes){BroadcastMessage(code, bytes, 0); }

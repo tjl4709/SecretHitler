@@ -104,6 +104,7 @@ namespace SecretHitlerClient
                         m_gameover = false;
                         m_electTrack = m_nLibPol = m_nFascPol = 0;
                         m_role = (Role)cmd[1];
+                        m_pres = m_chanc = m_lastPres = m_lastChanc = "";
                         OpenRolePopup();
                         if (!m_popHand.IsAlive) m_popHand.Start();
                         if (cmd.Length > 2) {
@@ -143,7 +144,6 @@ namespace SecretHitlerClient
                     case Command.VoteCnt: {
                         string passfail;
                         if (cmd[1] > (m_players.Count + 1) / 2) {
-                            m_electTrack = 0;
                             passfail = "pass";
                         } else {
                             m_electTrack++;
@@ -246,6 +246,17 @@ namespace SecretHitlerClient
                         m_vip = true;
                         ShowVIP();
                         break;
+                    case Command.Update: {
+                        m_role = Role.Audience;
+                        OpenRolePopup();
+                        if (!m_popHand.IsAlive) m_popHand.Start();
+                        string[] presChanc = Parser.ToString(cmd, 3).Split(',');
+                        m_pres = presChanc[0];
+                        m_chanc = presChanc[1];
+                        PlayerListToGame();
+                        EnactPolicies(cmd[1] - '0', cmd[2] - '0');
+                        break;
+                    }
                     case Command.Disconnect: {
                         string player = Parser.ToString(cmd);
                         if (m_players != null) {
@@ -634,6 +645,11 @@ namespace SecretHitlerClient
             }
             m_electTrack = 0;
             MainForm_Resize(this, EventArgs.Empty);
+        }
+        private void EnactPolicies(int nLib, int nFasc)
+        {
+            for (; nLib > 0; nLib--) EnactPolicy(true);
+            for (; nFasc > 0; nFasc--) EnactPolicy(false);
         }
         //game popup button_click handlers
         private void NominateButton_Click(object sender, EventArgs e)
