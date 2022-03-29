@@ -1,3 +1,5 @@
+make new release: clients crash when someone leaves (fixed), *server crashes with "Bad data"
+
 add display for how everyone voted
 special election should not skip players
 fix issue with clients joining too close together

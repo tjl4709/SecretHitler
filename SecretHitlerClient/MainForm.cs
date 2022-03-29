@@ -248,9 +248,11 @@ namespace SecretHitlerClient
                         break;
                     case Command.Disconnect: {
                         string player = Parser.ToString(cmd);
-                        m_players.Remove(player);
+                        if (m_players != null) {
+                            m_players.Remove(player);
+                            UpdatePlayerTable();
+                        }
                         m_connected.Remove(player);
-                        UpdatePlayerTable();
                         UpdatePlayerListBox();
                         break;
                     }
