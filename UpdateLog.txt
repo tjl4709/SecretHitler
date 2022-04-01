@@ -1,0 +1,12 @@
+[bug #]           new bug found that has not been fixed
+[bug report #]    status report on previously found bug
+[bug fix #]       old bug that has been fixed
+[feature]         new feature that has been added
+[feature update]  changes have been made to an existing feature
+[feature removal] feature has been removed
+
+----------------------------------------------------------------------------------------------------
+Version 1.1:
+ * [bug fix 0000] User closing their app before a game is started will no longer cause all other apps to
+     crash
+ * [bug report 0001] server crashing from "Bad Data" unable to be replicated
