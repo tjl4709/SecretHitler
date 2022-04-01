@@ -27,12 +27,10 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Collections;
 using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Security.Cryptography;
-
 using RedCorona.Cryptography;
 
 //[assembly:System.Reflection.AssemblyVersion("1.6.2010.1228")]
