@@ -80,7 +80,7 @@ namespace SecretHitlerServer
                     case Command.Start: {
                         if (ci.ID == vip_id) {
                             if (m_players.Count >= 5) {
-                                Console.WriteLine("The game has begun!");
+                                Console.WriteLine("\nThe game has begun!");
                                 m_game = new Game(m_players);
                                 m_policies = null;
                                 m_electTrack = 0;
