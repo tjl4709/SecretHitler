@@ -97,7 +97,7 @@ namespace SecretHitlerServer
                         if (m_game != null) {
                             m_nextChanc = Parser.ToString(cmd);
                             Console.WriteLine(m_nextChanc + " has been nominated as Chancellor.");
-                            if (m_nextChanc != m_game.NextPrez && m_nextChanc != m_game.Chancellor && (m_game.NumAlive <= 5 || m_nextChanc != m_game.President)) {
+                            if (m_nextChanc != m_game.NextPrez && m_nextChanc != m_game.Chancellor && (m_game.NumAlive > 5 || m_nextChanc != m_game.President)) {
                                 m_voteCnt = m_proCnt = 0;
                                 m_server.Broadcast(Parser.ToBytes(Command.Vote, m_nextChanc));
                             } else ci.Send(Parser.ErrMsg("Ineligable Chancellor nomination"));
