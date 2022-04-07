@@ -1,4 +1,4 @@
-make new release: clients crash when someone leaves (fixed), *server crashes with "Bad data"
+clear status msg after game, *server crashes with "Bad data", add logging to server, change background color, colorcode fellow fascists
 
 add display for how everyone voted
 special election should not skip players
