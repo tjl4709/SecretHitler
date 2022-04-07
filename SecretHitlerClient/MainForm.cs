@@ -25,6 +25,7 @@ namespace SecretHitlerClient
         string m_pres, m_chanc, m_lastPres, m_lastChanc, m_investigated;
         int m_electTrack, m_nLibPol, m_nFascPol;
         Bitmap[] m_vetoed;
+        string[] m_fascists;
 
         public MainForm(string[] args = null)
         {
@@ -78,7 +79,7 @@ namespace SecretHitlerClient
         private void ReadBytes(ClientInfo ci, byte[] data, int len)
         {
             byte[] cmd;
-            for (int cmdStart = 0; cmdStart < data.Length; cmdStart += data[cmdStart] + 1) {
+            for (int cmdStart = 0; cmdStart < len; cmdStart += data[cmdStart] + 1) {
                 cmd = new byte[data[cmdStart]];
                 Array.ConstrainedCopy(data, cmdStart + 1, cmd, 0, data[cmdStart]);
                 switch ((Command)cmd[0]) {
@@ -104,11 +105,11 @@ namespace SecretHitlerClient
                         OpenRolePopup();
                         if (!m_popHand.IsAlive) m_popHand.Start();
                         if (cmd.Length > 2) {
-                            string[] fascists = Parser.ToString(cmd, 2).Split(new char[] { (char)Role.Fascist }, StringSplitOptions.RemoveEmptyEntries);
+                            m_fascists = Parser.ToString(cmd, 2).Split(new char[] { (char)Role.Fascist }, StringSplitOptions.RemoveEmptyEntries);
                             if ((Role)cmd.Last() == Role.Hitler)
-                                fascists[fascists.Length-1] = fascists[fascists.Length-1].Substring(0,fascists[fascists.Length-1].Length-1) + " (Hitler)";
-                            Array.Sort(fascists);
-                            m_popups.Enqueue(new Popup(string.Join("\n", fascists), "Fellow Fascists"));
+                                m_fascists[m_fascists.Length-1] = m_fascists[m_fascists.Length-1].Substring(0,m_fascists[m_fascists.Length-1].Length-1) + " (Hitler)";
+                            Array.Sort(m_fascists);
+                            m_popups.Enqueue(new Popup(string.Join("\n", m_fascists), "Fellow Fascists"));
                         }
                         PlayerListToGame();
                         break;
@@ -485,6 +486,7 @@ namespace SecretHitlerClient
             //setup PlayerTable
             m_players.Remove(UsernameDisplay.Text);
             UpdatePlayerTable();
+            UpdateStatusMsg("", Color.Black);
             GamePanel.Show();
             MainForm_Resize(this, EventArgs.Empty);
         }
@@ -562,7 +564,7 @@ namespace SecretHitlerClient
                     try {
                         Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         sock.Connect(ip, port);
-                        m_ci = new ClientInfo(sock, null, ReadBytes, ClientDirection.Both, true, EncryptionType.ServerRSAClientKey);
+                        m_ci = new ClientInfo(sock, null, ReadBytes, ClientDirection.Both, true);
                         while (!m_ci.EncryptionReady) Thread.Sleep(100);
                         m_ci.Send(Parser.ToBytes(Command.Name, UsernameEdit.Text));
                         ErrorLabel.Text = "Connected!";
@@ -606,6 +608,8 @@ namespace SecretHitlerClient
                 PlayerTable.GetControlFromPosition(1, i).Text = m_players[i];
                 ((PictureBox)PlayerTable.GetControlFromPosition(0, i)).Image =
                     m_players[i] == m_pres ? Resources.pres : m_players[i] == m_chanc ? Resources.chanc : null;
+                PlayerTable.GetControlFromPosition(1, i).ForeColor =
+                    m_fascists != null && Array.IndexOf(m_fascists, m_players[i]) != -1 ? Color.Red : Color.Black;
             }
             for (; i < PlayerTable.RowCount; i++) {
                 PlayerTable.GetControlFromPosition(1, i).Text = "";

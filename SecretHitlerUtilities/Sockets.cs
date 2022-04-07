@@ -32,6 +32,7 @@ using System.Net.Sockets;
 using System.Windows.Forms;
 using System.Security.Cryptography;
 using RedCorona.Cryptography;
+using System.Threading;
 
 //[assembly:System.Reflection.AssemblyVersion("1.6.2010.1228")]
 
@@ -880,10 +881,13 @@ namespace RedCorona.Net {
 		}
 
 		public void Broadcast(byte[] bytes){
-			try {
+            try {
 				lock (SyncRoot) foreach (ClientInfo ci in Clients) ci.Send(bytes);
-			} catch (Exception e) {
-				if (clients.Count > 0) throw e;
+			} catch (Exception) {
+				if (clients.Count > 0) {
+					Thread.Sleep(100);
+					lock (SyncRoot) foreach (ClientInfo ci in Clients) ci.Send(bytes);
+                }
             }
 		}
 

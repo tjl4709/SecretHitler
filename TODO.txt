@@ -1,4 +1,4 @@
-clear status msg after game, *server crashes with "Bad data", add logging to server, change background color, colorcode fellow fascists
+*server crashes with "Bad data", add logging to server, correct win message for audience members
 
 add display for how everyone voted
 special election should not skip players

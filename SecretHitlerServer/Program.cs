@@ -22,7 +22,7 @@ namespace SecretHitlerServer
             m_players = new List<string>(10);
             m_server = new Server(args.Length > 0 ? int.Parse(args[0]) : 0);
             m_server.ClientReady += ClientReady;
-            m_server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
+            //m_server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
             Console.WriteLine("Listening on port " + m_server.Port);
             Console.WriteLine("Enter \"Exit\" to stop server.");
             string com;
@@ -43,7 +43,7 @@ namespace SecretHitlerServer
         static void ReadBytes(ClientInfo ci, byte[] data, int len)
         {
             byte[] cmd;
-            for (int cmdStart = 0; cmdStart < data.Length; cmdStart += data[cmdStart] + 1) {
+            for (int cmdStart = 0; cmdStart < len; cmdStart += data[cmdStart] + 1) {
                 cmd = new byte[data[cmdStart]];
                 Array.ConstrainedCopy(data, cmdStart + 1, cmd, 0, data[cmdStart]);
                 switch ((Command)cmd[0]) {
@@ -97,7 +97,7 @@ namespace SecretHitlerServer
                         if (m_game != null) {
                             m_nextChanc = Parser.ToString(cmd);
                             Console.WriteLine(m_nextChanc + " has been nominated as Chancellor.");
-                            if (m_nextChanc != m_game.NextPrez && m_nextChanc != m_game.Chancellor && (m_game.NumAlive > 5 || m_nextChanc != m_game.President)) {
+                            if (m_nextChanc != m_game.NextPrez && m_nextChanc != m_game.Chancellor && (m_game.NumAlive <= 5 || m_nextChanc != m_game.President)) {
                                 m_voteCnt = m_proCnt = 0;
                                 m_server.Broadcast(Parser.ToBytes(Command.Vote, m_nextChanc));
                             } else ci.Send(Parser.ErrMsg("Ineligable Chancellor nomination"));

@@ -594,7 +594,7 @@ namespace SecretHitlerClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Salmon;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(235)))), ((int)(((byte)(120)))), ((int)(((byte)(60)))));
             this.ClientSize = new System.Drawing.Size(1067, 554);
             this.Controls.Add(this.UsernameDisplay);
             this.Controls.Add(this.PlayerListPanel);

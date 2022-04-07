@@ -6,7 +6,14 @@
 [feature removal] feature has been removed
 
 ----------------------------------------------------------------------------------------------------
+Version 1.2:
+ * [bug fix 0002] corrected logic for who is elligible as next chancellor
+ * [feature] when playing as fascist, fellow fascists' usernames are now displayed in red
+ * [bug report 0001] server crashing from "Bad Data": encryption removed. This should solve the
+     problem, but further testing is required before accepting that the bug is completely fixed
+ * [feature update] background color changed from salmon to an orange
+----------------------------------------------------------------------------------------------------
 Version 1.1:
- * [bug fix 0000] User closing their app before a game is started will no longer cause all other apps to
-     crash
+ * [bug fix 0000] User closing their app before a game is started will no longer cause all other
+     apps to crash
  * [bug report 0001] server crashing from "Bad Data" unable to be replicated
