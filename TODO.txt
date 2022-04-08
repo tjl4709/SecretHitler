@@ -1,5 +1,7 @@
-*server crashes with "Bad data", add logging to server, correct win message for audience members
+server crashes with "Bad data"?, handle player leaving during vote or legislative section (if pres or chanc)
 
+add logging to the server
+add a way to leave/join game on playerlist panel
 add display for how everyone voted
 special election should not skip players
-fix issue with clients joining too close together
+fix issue with clients joining too close together?

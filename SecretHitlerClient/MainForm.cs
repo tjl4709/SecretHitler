@@ -16,7 +16,7 @@ namespace SecretHitlerClient
     {
         ClientInfo m_ci;
         List<string> m_players, m_connected;
-        bool m_vip, m_gameover;
+        bool m_vip, m_gameover, m_audience;
         Role m_role;
         readonly Thread m_popHand;
         readonly Queue<Popup> m_popups;
@@ -29,7 +29,7 @@ namespace SecretHitlerClient
 
         public MainForm(string[] args = null)
         {
-            m_vip = m_gameover = false;
+            m_vip = m_gameover = m_audience = false;
             m_electTrack = 0;
             m_connected = new List<string>(10);
             m_popups = new Queue<Popup>();
@@ -110,6 +110,9 @@ namespace SecretHitlerClient
                                 m_fascists[m_fascists.Length-1] = m_fascists[m_fascists.Length-1].Substring(0,m_fascists[m_fascists.Length-1].Length-1) + " (Hitler)";
                             Array.Sort(m_fascists);
                             m_popups.Enqueue(new Popup(string.Join("\n", m_fascists), "Fellow Fascists"));
+                            for (int i = 0; i < m_fascists.Length; i++)
+                                if (m_fascists[i][m_fascists[i].Length-1] == ')')
+                                    m_fascists[i] = m_fascists[i].Substring(0, m_fascists[i].Length - 9);
                         }
                         PlayerListToGame();
                         break;
@@ -134,7 +137,7 @@ namespace SecretHitlerClient
                         if (m_chanc == UsernameDisplay.Text)
                             PosDisplay.Image = Resources.chanc;
                         UpdatePlayerTable();
-                        if (m_role != Role.Audience)
+                        if (!m_audience)
                             OpenVotePopup();
                         break;
                     }
@@ -197,7 +200,7 @@ namespace SecretHitlerClient
                                     Image = Resources.blood,
                                     BackgroundImage = m_role == Role.Liberal ? Resources.lsr : m_role == Role.Fascist ? Resources.fsr : Resources.hsr
                                 };
-                                m_role = Role.Audience;
+                                m_audience = true;
                                 pb.Width = (int)Math.Round((double)pb.Height * pb.BackgroundImage.Width / pb.BackgroundImage.Height);
                                 m_popups.Enqueue(new Popup("You can stay and watch or leave the game.", "You have been executed", pb, true));
                             } else {
@@ -231,7 +234,9 @@ namespace SecretHitlerClient
                     }
                     case Command.Winner: {
                         string caption;
-                        if (((Role)cmd[1] == Role.Liberal) == (m_role == Role.Liberal))
+                        if (m_role == Role.Audience)
+                            caption = "";
+                        else if (((Role)cmd[1] == Role.Liberal) == (m_role == Role.Liberal))
                             caption = "You won!";
                         else caption = "You lost.";
                         m_gameover = true;
@@ -332,9 +337,10 @@ namespace SecretHitlerClient
             if (m_role == Role.Liberal)
                 m_popups.Enqueue(new Popup("You are a Liberal. Enact 5 Liberal policies or execute Hitler.",
                     title, new Bitmap[] { Resources.lpm, Resources.lsr }));
-            else if (m_role == Role.Audience)
+            else if (m_role == Role.Audience) {
+                m_audience = true;
                 m_popups.Enqueue(new Popup("You are an Audience member. You may watch\nthe game progress, but cannot partake in it.", title));
-            else
+            }  else
                 m_popups.Enqueue(new Popup("You are a Fascist. Enact 6 Fascist policies or elect Hitler as" +
                     " Chancellor after enacting 3 Fascist policies", title, new Bitmap[]
                     { Resources.fpm, m_role==Role.Fascist ? Resources.fsr : Resources.hsr}));
@@ -472,7 +478,7 @@ namespace SecretHitlerClient
             }
             PlayerListPanel.Hide();
             m_players = new List<string>(m_connected);
-            RoleDisplay.Text = m_role == Role.Audience ? "Audience" : m_role.ToString();
+            RoleDisplay.Text = m_audience ? "Audience" : m_role.ToString();
             PosDisplay.Image = null;
             //hide policies
             for (int i = 0; i < m_libPols.Length; i++)
@@ -577,6 +583,7 @@ namespace SecretHitlerClient
             } else m_ci.Send(Parser.ToBytes(Command.Name, UsernameEdit.Text));
             ErrorLabel.Visible = true;
         }
+
         //playerlist panel
         private void UpdatePlayerListBox()
         {
@@ -651,6 +658,7 @@ namespace SecretHitlerClient
             for (; nLib > 0; nLib--) EnactPolicy(true);
             for (; nFasc > 0; nFasc--) EnactPolicy(false);
         }
+
         //game popup button_click handlers
         private void NominateButton_Click(object sender, EventArgs e)
         {
@@ -729,6 +737,7 @@ namespace SecretHitlerClient
                 m_ci.Send(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, (byte)(ctrl.Text == "Accept" ? 1 : 0) });
             ClosePopup(sender, e);
         }
+
         //game popup image_click handlers
         private void VoteImage_Click(object sender, EventArgs e)
         {
