@@ -311,8 +311,7 @@ namespace SecretHitlerServer
                     m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, (string)ci.Data));
                     if (m_game.Kill((string)ci.Data)) {
                         m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected and was hitler"));
-                        m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
-                        Console.WriteLine("Hitler has left so the Liberals win.");
+                        SendWinner("Hitler has left so the Liberals win.");
                     } else m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected"));
                 }
                 foreach (string key in m_clients.Keys)
