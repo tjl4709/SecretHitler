@@ -1,5 +1,6 @@
-server crashes with "Bad data"?, handle player leaving during vote or legislative section (if pres or chanc)
+server crashes with "Bad data"?
 
+handle player leaving during vote or legislative section (if pres or chanc)
 add logging to the server
 add a way to leave/join game on playerlist panel
 add display for how everyone voted

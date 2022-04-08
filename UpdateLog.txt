@@ -6,6 +6,9 @@
 [feature removal] feature has been removed
 
 ----------------------------------------------------------------------------------------------------
+Version 1.3:
+ * [feature update] modified chancellor nametag for better readability
+----------------------------------------------------------------------------------------------------
 Version 1.2:
  * [bug fix 0002] corrected logic for who is elligible as next chancellor
  * [feature] when playing as fascist, fellow fascists' usernames are now displayed in red
