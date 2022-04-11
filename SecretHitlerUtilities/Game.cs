@@ -38,6 +38,22 @@ namespace SecretHitlerUtilities
         public bool Veto { get { return NumFascistPolicies >= 5; } }
         public Role Winner;
 
+        public Dictionary<string, bool?> Votes;
+        public bool VotingComplete { get { foreach (string key in Votes.Keys) if (Votes[key] == null) return false; return true; } }
+        public bool VotePassed { get {
+                int pro = 0;
+                foreach (string key in Votes.Keys)
+                    if (Votes[key] == null) return false;
+                    else if ((bool)Votes[key]) pro++;
+                return pro > Votes.Count / 2;
+            } }
+        public List<string> ProVoters { get {
+                List<string> pros = new List<string>();
+                foreach (string key in Votes.Keys)
+                    if ((bool)Votes[key]) pros.Add(key);
+                return pros;
+            } }
+
         private Dictionary<string, Role> m_parties;
         public Dictionary<string, Role>.KeyCollection LivingPlayers { get { return m_parties.Keys; } }
 
@@ -48,6 +64,7 @@ namespace SecretHitlerUtilities
         public Game(List<string> players)
         {
             m_parties = new Dictionary<string, Role>(players.Count);
+            Votes = new Dictionary<string, bool?>(players.Count);
             draw = new List<Role>(17);
             discard = new List<Role>(10);
             m_pres = m_chanc = "";
@@ -59,6 +76,7 @@ namespace SecretHitlerUtilities
             int i, nf = (players.Count - 1) / 2, nl = players.Count - nf;
             bool hitler = false;
             for (i = 0; i < players.Count; i++) {
+                Votes.Add(players[i], null);
                 if (rand.Next(nf+nl) < nl) {
                     nl--;
                     m_parties.Add(players[i], Role.Liberal);
@@ -124,7 +142,7 @@ namespace SecretHitlerUtilities
         { if (m_parties.ContainsKey(player)) return m_parties[player]; else return Role.None; }
         public bool Kill(string player)
         {
-            if (!m_parties.ContainsKey(player))
+            if (!Votes.Remove(player))
                 return false;
             string nextPres = NextPrez;
             bool isHitler = m_parties[player] == Role.Hitler;
@@ -136,6 +154,8 @@ namespace SecretHitlerUtilities
             if (isHitler) Winner = Role.Liberal;
             return isHitler;
         }
+
+        public void StartVoting() { Votes.Clear(); foreach (string player in m_parties.Keys) Votes.Add(player, null); }
 
         public void NextPrezResult(bool elected)
         {

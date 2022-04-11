@@ -10,7 +10,7 @@ namespace SecretHitlerServer
     class Program
     {
         static Server m_server;
-        static int vip_id, m_voteCnt, m_proCnt, m_electTrack;
+        static int vip_id, m_electTrack;
         static Dictionary<string, ClientInfo> m_clients;
         static List<string> m_players;
         static Game m_game;
@@ -29,8 +29,13 @@ namespace SecretHitlerServer
                 if (!Directory.Exists(m_logFile)) Directory.CreateDirectory(m_logFile);
                 m_logFile += "\\SHSL_" + DateTime.Now.ToString("s").Replace('T', '_').Replace(':', '-') + ".log";
                 m_logWriter = File.CreateText(m_logFile);
-                AppDomain.CurrentDomain.UnhandledException += (s, a) =>
+                AppDomain.CurrentDomain.UnhandledException += (s, a) => {
+#if DEBUG
+                    Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.ToString());
+#else
                     Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.Message);
+#endif
+                };
                 AppDomain.CurrentDomain.ProcessExit += (s, e) => m_logWriter?.Close();
             }
             string[] doLog = { "1", "yes", "t", "true" };
@@ -40,7 +45,12 @@ namespace SecretHitlerServer
             vip_id = -1;
             m_clients = new Dictionary<string, ClientInfo>(10);
             m_players = new List<string>(10);
-            m_server = new Server(args.Length > 1 && int.TryParse(args[1], out int port) ? port : 0);
+            try {
+                m_server = new Server(args.Length > 1 && int.TryParse(args[1], out int port) ? port : 0);
+            } catch {
+                Log("Given port was out of range (0-65535) or already in use.");
+                m_server = new Server(0);
+            }
             m_server.ClientReady += ClientReady;
             //m_server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
 
@@ -119,7 +129,7 @@ namespace SecretHitlerServer
                             m_nextChanc = Parser.ToString(cmd);
                             Log(m_nextChanc + " has been nominated as Chancellor.");
                             if (m_nextChanc != m_game.NextPrez && m_nextChanc != m_game.Chancellor && (m_game.NumAlive <= 5 || m_nextChanc != m_game.President)) {
-                                m_voteCnt = m_proCnt = 0;
+                                m_game.StartVoting();
                                 m_server.Broadcast(Parser.ToBytes(Command.Vote, m_nextChanc));
                             } else ci.Send(Parser.ErrMsg("Ineligable Chancellor nomination"));
                         } else ci.Send(Parser.ErrMsg("Game not started"));
@@ -128,23 +138,8 @@ namespace SecretHitlerServer
                     case Command.Vote: {
                         if (m_game != null) {
                             if (cmd.Length == 2) {
-                                m_voteCnt++;
-                                if (cmd[1] == 1) m_proCnt++;
-                                if (m_voteCnt == m_game.NumAlive) {
-                                    m_server.Broadcast(new byte[] { 2, (byte)Command.VoteCnt, (byte)m_proCnt });
-                                    m_game.NextPrezResult(m_proCnt > m_voteCnt / 2);
-                                    Log("The vote " + (m_proCnt > m_voteCnt / 2 ? "passed" : "failed") + $" with {m_proCnt}/{m_voteCnt}");
-                                    if (m_proCnt > m_voteCnt / 2) {
-                                        m_game.Chancellor = m_nextChanc;
-                                        if (!SendWinner("Hitler was elected Chancellor after 3 Fascist policies and the Fascists have won!")) {
-                                            if (m_policies == null || m_policies.Count < 3)
-                                                m_policies = m_game.Draw();
-                                            m_clients[m_game.President].Send(new byte[] { 4, (byte)Command.Policy, (byte)m_policies[0], (byte)m_policies[1], (byte)m_policies[2] });
-                                        }
-                                    } else {
-                                        IncElectTrack();
-                                    }
-                                }
+                                m_game.Votes[(string)ci.Data] = cmd[1] == 1;
+                                CheckVoting();
                             } else ci.Send(Parser.ErrMsg("Improper format: Vote command must only contain boolean value"));
                         } else ci.Send(Parser.ErrMsg("Game not started"));
                         break;
@@ -273,6 +268,25 @@ namespace SecretHitlerServer
                     }
                 else m_clients[key].Send(new byte[] { 2, (byte)Command.Start, (byte)Role.Audience });
         }
+        static void CheckVoting()
+        {
+            if (m_game.VotingComplete) {
+                m_server.Broadcast(Parser.ToBytes(Command.VoteCnt, string.Join(",", m_game.ProVoters)));
+                bool passed = m_game.VotePassed;
+                m_game.NextPrezResult(passed);
+                Log($"The vote {(passed ? "passed" : "failed")} with {string.Join(", ", m_game.ProVoters)} voting ja");
+                if (passed) {
+                    m_game.Chancellor = m_nextChanc;
+                    if (!SendWinner("Hitler was elected Chancellor after 3 Fascist policies and the Fascists have won!")) {
+                        if (m_policies == null || m_policies.Count < 3)
+                            m_policies = m_game.Draw();
+                        m_clients[m_game.President].Send(new byte[] { 4, (byte)Command.Policy, (byte)m_policies[0], (byte)m_policies[1], (byte)m_policies[2] });
+                    }
+                } else {
+                    IncElectTrack();
+                }
+            }
+        }
         static void IncElectTrack()
         {
             if (++m_electTrack >= 3) {
@@ -335,11 +349,15 @@ namespace SecretHitlerServer
             if (m_players.Remove((string)ci.Data)) {
                 m_server.Broadcast(Parser.ToBytes(Command.Disconnect, (string)ci.Data));
                 if (m_game != null && m_game.Contains((string)ci.Data)) {
+                    bool inVote = !m_game.VotingComplete;
                     m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, (string)ci.Data));
                     if (m_game.Kill((string)ci.Data)) {
                         m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected and was hitler"));
                         SendWinner("Hitler has left so the Liberals win.");
-                    } else m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected"));
+                    } else {
+                        m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected"));
+                        if (inVote) CheckVoting();
+                    }
                 }
                 foreach (string key in m_clients.Keys)
                     if (m_players.Count >= 10)

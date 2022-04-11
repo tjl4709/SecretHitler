@@ -100,8 +100,7 @@ namespace SecretHitlerClient
                     case Command.Start: {
                         m_gameover = false;
                         m_electTrack = m_nLibPol = m_nFascPol = 0;
-                        m_role = (Role)cmd[1];
-                        m_audience = m_role == Role.Audience;
+                        m_audience = (m_role = (Role)cmd[1]) == Role.Audience;
                         m_pres = m_chanc = m_lastPres = m_lastChanc = "";
                         OpenRolePopup();
                         if (!m_popHand.IsAlive) m_popHand.Start();
@@ -143,8 +142,12 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.VoteCnt: {
+                        string[] pros = cmd.Length > 1 ? Parser.ToString(cmd).Split(',') : new string[]{ };
+                        List<string> antis = new List<string>(m_players);
+                        antis.Add(UsernameDisplay.Text);
+                        for (int i = 0; i < pros.Length; i++) antis.Remove(pros[i]);
                         string passfail;
-                        if (cmd[1] > (m_players.Count + 1) / 2) {
+                        if (pros.Length > (m_players.Count + 1) / 2) {
                             passfail = "pass";
                         } else {
                             m_electTrack++;
@@ -152,7 +155,8 @@ namespace SecretHitlerClient
                             m_chanc = m_lastChanc;
                             passfail = "fail";
                         }
-                        UpdateStatusMsg($"The vote {passfail}ed with {cmd[1]}/{m_players.Count+1}.", Color.Black);
+                        UpdateStatusMsg($"The vote {passfail}ed with {pros.Length}/{m_players.Count+1}.", Color.Black);
+                        OpenVoteCntPopup(pros, antis.ToArray());
                         MainForm_Resize(this, EventArgs.Empty);
                         break;
                     }
@@ -241,6 +245,8 @@ namespace SecretHitlerClient
                             caption = "You won!";
                         else caption = "You lost.";
                         m_gameover = true;
+                        m_popups.Clear();
+                        if (m_currPop != null) ClosePopup(this, EventArgs.Empty);
                         m_popups.Enqueue(new Popup(caption, $"The {(Role)cmd[1]}s won", new Bitmap[]
                             { (Role)cmd[1] == Role.Liberal ? Resources.lpm : Resources.fpm }));
                         break;
@@ -352,6 +358,42 @@ namespace SecretHitlerClient
                 new Bitmap[] { Resources.nein, Resources.ja }, false);
             popup.ImageClick = VoteImage_Click;
             m_popups.Enqueue(popup);
+        }
+        private void OpenVoteCntPopup(string[] pros, string[] antis)
+        {
+            TableLayoutPanel table = new TableLayoutPanel {
+                ColumnCount = 2,
+                RowCount = Math.Max(pros.Length, antis.Length) + 1,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+            table.Controls.Add(new Label() {
+                Text = "Nein:  ",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Dock = DockStyle.Fill,
+                AutoSize = true
+            }, 0, 0);
+            table.Controls.Add(new Label() {
+                Text = "Ja:  ",
+                TextAlign = ContentAlignment.MiddleLeft,
+                Dock = DockStyle.Fill,
+                AutoSize = true
+            }, 1, 0);
+            for (int i = 0; i < antis.Length; i++)
+                table.Controls.Add(new Label() {
+                    Text = "    " + antis[i],
+                    TextAlign = ContentAlignment.MiddleRight,
+                    Dock = DockStyle.Fill,
+                    AutoSize = true
+                }, 0, i + 1);
+            for (int i = 0; i < pros.Length; i++)
+                table.Controls.Add(new Label() {
+                    Text = "    " + pros[i],
+                    TextAlign = ContentAlignment.MiddleRight,
+                    Dock = DockStyle.Fill,
+                    AutoSize = true
+                }, 1, i + 1);
+            m_popups.Enqueue(new Popup(StatusMsg.Text, "Election Results", table, true));
         }
         private void OpenPolicyPopup(byte[] cmd)
         {

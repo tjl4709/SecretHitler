@@ -8,9 +8,14 @@
 ----------------------------------------------------------------------------------------------------
 Version 2.0:
  * [feature] logging has been added to server
+ * [feature update] upon completetion of voting, a pop-up appears showing how everyone voted
+ * [feature update] server can now handle a player disconnecting during the voting session
+ * [feature update] all pop-ups will be closed automatically before a win message is shown
 ====================================================================================================
 Version 1.3:
  * [feature update] modified chancellor nametag for better readability
+ * [bug fix 0004] audience role removed between games
+ * [bug fix 0005] colored playernames reset between games
 ----------------------------------------------------------------------------------------------------
 Version 1.2:
  * [bug fix 0002] corrected logic for who is elligible as next chancellor
