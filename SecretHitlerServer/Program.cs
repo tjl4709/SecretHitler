@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using RedCorona.Net;
 using SecretHitlerUtilities;
+using System.IO;
+using System.Reflection;
 
 namespace SecretHitlerServer
 {
@@ -14,15 +16,34 @@ namespace SecretHitlerServer
         static Game m_game;
         static string m_nextChanc;
         static List<Role> m_policies;
+        static string m_logFile = null;
+        static StreamWriter m_logWriter = null;
 
         static void Main(string[] args)
         {
+            //set up logging
+            string[] dontLog = { "0", "no", "f", "false" };
+            if (args.Length == 0 || Array.IndexOf(dontLog, args[0].ToLower()) == -1) {
+                m_logFile = Assembly.GetEntryAssembly().Location;
+                m_logFile = m_logFile.Substring(0, m_logFile.LastIndexOf('\\') + 1) + "logs";
+                if (!Directory.Exists(m_logFile)) Directory.CreateDirectory(m_logFile);
+                m_logFile += "\\SHSL_" + DateTime.Now.ToString("s").Replace('T', '_').Replace(':', '-') + ".log";
+                m_logWriter = File.CreateText(m_logFile);
+                AppDomain.CurrentDomain.UnhandledException += (s, a) =>
+                    Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.Message);
+                AppDomain.CurrentDomain.ProcessExit += (s, e) => m_logWriter?.Close();
+            }
+            string[] doLog = { "1", "yes", "t", "true" };
+            if (args.Length > 0 && Array.IndexOf(doLog, args[0].ToLower()) == -1)
+                Log(args[0] + " not recognized for whether to log or not. Logging enabled.");
+            
             vip_id = -1;
             m_clients = new Dictionary<string, ClientInfo>(10);
             m_players = new List<string>(10);
-            m_server = new Server(args.Length > 0 ? int.Parse(args[0]) : 0);
+            m_server = new Server(args.Length > 1 && int.TryParse(args[1], out int port) ? port : 0);
             m_server.ClientReady += ClientReady;
             //m_server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
+
             Console.WriteLine("Listening on port " + m_server.Port);
             Console.WriteLine("Enter \"Exit\" to stop server.");
             string com;
@@ -57,18 +78,18 @@ namespace SecretHitlerServer
                         } else {
                             ci.Send(new byte[] { 2, (byte)Command.Name, 1 });
                             ci.Data = name;
-                            Console.WriteLine(name + " has connected to the server");
+                            Log(name + " has connected to the server");
                             if (vip_id == -1) {
                                 vip_id = ci.ID;
                                 ci.Send(new byte[] { 1, (byte)Command.VIP });
-                                Console.WriteLine(name + " is the VIP");
+                                Log(name + " is the VIP");
                             }
                             m_clients.Add(name, ci);
                             if (m_players.Count > 0)
                                 ci.Send(Parser.ToBytes(Command.Name, string.Join(",", m_players)));
                             if (m_players.Count < 10) {
                                 m_players.Add(name);
-                                Console.WriteLine(name + " has joined the game");
+                                Log(name + " has joined the game");
                                 m_server.Broadcast(Parser.ToBytes(Command.Name, name));
                             }
                             if (m_game != null)
@@ -80,13 +101,13 @@ namespace SecretHitlerServer
                     case Command.Start: {
                         if (ci.ID == vip_id) {
                             if (m_players.Count >= 5) {
-                                Console.WriteLine("\nThe game has begun!");
+                                Log("\nThe game has begun!");
                                 m_game = new Game(m_players);
                                 m_policies = null;
                                 m_electTrack = 0;
                                 SendRoles();
                                 m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                                Console.WriteLine(m_game.NextPrez + " is the next President.");
+                                Log(m_game.NextPrez + " is the next President.");
                             } else
                                 ci.Send(Parser.ErrMsg("Insufficient amount of players. At least 5 are required"));
                         } else
@@ -96,7 +117,7 @@ namespace SecretHitlerServer
                     case Command.PosAssign: {
                         if (m_game != null) {
                             m_nextChanc = Parser.ToString(cmd);
-                            Console.WriteLine(m_nextChanc + " has been nominated as Chancellor.");
+                            Log(m_nextChanc + " has been nominated as Chancellor.");
                             if (m_nextChanc != m_game.NextPrez && m_nextChanc != m_game.Chancellor && (m_game.NumAlive <= 5 || m_nextChanc != m_game.President)) {
                                 m_voteCnt = m_proCnt = 0;
                                 m_server.Broadcast(Parser.ToBytes(Command.Vote, m_nextChanc));
@@ -112,7 +133,7 @@ namespace SecretHitlerServer
                                 if (m_voteCnt == m_game.NumAlive) {
                                     m_server.Broadcast(new byte[] { 2, (byte)Command.VoteCnt, (byte)m_proCnt });
                                     m_game.NextPrezResult(m_proCnt > m_voteCnt / 2);
-                                    Console.WriteLine("The vote " + (m_proCnt > m_voteCnt / 2 ? "passed" : "failed"));
+                                    Log("The vote " + (m_proCnt > m_voteCnt / 2 ? "passed" : "failed") + $" with {m_proCnt}/{m_voteCnt}");
                                     if (m_proCnt > m_voteCnt / 2) {
                                         m_game.Chancellor = m_nextChanc;
                                         if (!SendWinner("Hitler was elected Chancellor after 3 Fascist policies and the Fascists have won!")) {
@@ -136,24 +157,24 @@ namespace SecretHitlerServer
                                     m_clients[m_game.Chancellor].Send(new byte[] { 3, (byte)Command.Policy, (byte)m_policies[0], (byte)m_policies[1] });
                                 } else {
                                     m_electTrack = 0;
-                                    Console.WriteLine("A " + (Role)cmd[1] + " ploicy was enacted.");
+                                    Log("A " + (Role)cmd[1] + " ploicy was enacted.");
                                     m_server.Broadcast(new byte[] { 2, (byte)Command.Policy, cmd[1] });
                                     m_game.Discard(m_policies[0]);
                                     FascistPowers pow = m_game.Play((Role)cmd[1]);
                                     if (!SendWinner("The " + m_game.Winner + "s have enacted enough policies and won!")) {
                                         if (pow != FascistPowers.None) {
-                                            Console.WriteLine("The President has received the " + pow + " power.");
+                                            Log("The President has received the " + pow + " power.");
                                             if (pow == FascistPowers.PolicyPeek) {
                                                 m_policies = m_game.Draw();
                                                 m_clients[m_game.President].Send(new byte[] { 5, (byte)Command.FascPow, (byte)pow,
                                                 (byte)m_policies[0], (byte)m_policies[1], (byte)m_policies[2] });
                                                 m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                                                Console.WriteLine(m_game.NextPrez + " is the next President.");
+                                                Log(m_game.NextPrez + " is the next President.");
                                             } else
                                                 m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)pow });
                                         } else {
                                             m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                                            Console.WriteLine(m_game.NextPrez + " is the next President.");
+                                            Log(m_game.NextPrez + " is the next President.");
                                         }
                                     }
                                 }
@@ -166,7 +187,7 @@ namespace SecretHitlerServer
                             if ((FascistPowers)cmd[1] == FascistPowers.Veto) {
                                 string msg;
                                 if ((string)ci.Data == m_game.Chancellor) {
-                                    Console.WriteLine((msg = "The Chancellor has requested a veto") + '.');
+                                    Log((msg = "The Chancellor has requested a veto") + '.');
                                     m_server.Broadcast(Parser.ToBytes(Command.General, msg));
                                     m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
                                 } else if ((string)ci.Data == m_game.President) {
@@ -175,7 +196,7 @@ namespace SecretHitlerServer
                                         m_game.Discard(m_policies);
                                         m_policies.Clear();
                                     } else msg = "The President has denied the veto";
-                                    Console.WriteLine(msg + '.');
+                                    Log(msg + '.');
                                     m_server.Broadcast(Parser.ToBytes(Command.General, msg));
                                     m_server.Broadcast(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, cmd[2] });
                                     if (cmd[2] == 1) IncElectTrack();
@@ -195,12 +216,12 @@ namespace SecretHitlerServer
                                     case FascistPowers.SpecialElection:
                                         if (player != m_game.President) {
                                             m_game.NextPrez = player;
-                                            Console.WriteLine(player + " has been selected as the next President.");
+                                            Log(player + " has been selected as the next President.");
                                         } else ci.Send(Parser.ErrMsg("Cannot choose current president"));
                                         break;
                                     case FascistPowers.Execution:
                                         m_game.Kill(player);
-                                        Console.WriteLine(player + " has been executed.");
+                                        Log(player + " has been executed.");
                                         m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, player));
                                         if (SendWinner("The Liberals have executed Hitler and won!")) return;
                                         break;
@@ -208,17 +229,17 @@ namespace SecretHitlerServer
                                         ci.Send(Parser.ErrMsg("Unrecognized presidential power"));
                                         break;
                                 }
-                                Console.WriteLine(m_game.NextPrez + " is the next President.");
+                                Log(m_game.NextPrez + " is the next President.");
                                 m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
                             } else ci.Send(Parser.ErrMsg("Only the president may use presidential powers"));
                         } else ci.Send(Parser.ErrMsg("Game not started"));
                         break;
                     }
                     case Command.General:
-                        Console.WriteLine("Received message: " + Parser.ToString(cmd));
+                        Log("Received message: " + Parser.ToString(cmd));
                         break;
                     case Command.Error:
-                        Console.WriteLine("Received error: " + Parser.ToString(cmd));
+                        Log("Received error: " + Parser.ToString(cmd));
                         break;
                     default:
                         ci.Send(Parser.ErrMsg("Unrecognized command: 0x" + cmd[0].ToString("X")));
@@ -263,16 +284,16 @@ namespace SecretHitlerServer
                     m_policies.RemoveAt(0);
                 }
                 m_server.Broadcast(new byte[] { 2, (byte)Command.Policy, (byte)policy });
-                Console.WriteLine("The people were fed up with the inactive govt and enacted a " + policy + "policy.");
+                Log("The people were fed up with the inactive govt and enacted a " + policy + "policy.");
                 m_game.Play(policy);
                 if (m_game.Winner != Role.None) {
                     m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
-                    Console.WriteLine("The " + m_game.Winner + "s enacted enough policies and won!");
+                    Log("The " + m_game.Winner + "s enacted enough policies and won!");
                     return;
                 }
                 m_game.President = m_game.Chancellor = "";
             }
-            Console.WriteLine(m_game.NextPrez + " is the next President.");
+            Log(m_game.NextPrez + " is the next President.");
             m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
         }
         static bool SendWinner(string msg)
@@ -280,9 +301,15 @@ namespace SecretHitlerServer
             if (m_game.Winner == Role.None)
                 return false;
             m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)m_game.Winner });
-            Console.WriteLine(msg);
+            Log(msg);
             m_game = null;
             return true;
+        }
+
+        static void Log(string msg)
+        {
+            Console.WriteLine(msg);
+            m_logWriter?.WriteLine(msg);
         }
 
         static void ConnectionClosed(ClientInfo ci)
@@ -300,11 +327,11 @@ namespace SecretHitlerServer
                         }
                     if (newVIP != null) {
                         newVIP.Send(new byte[] { 1, (byte)Command.VIP });
-                        Console.WriteLine(newVIP.Data + " is the new VIP.");
+                        Log(newVIP.Data + " is the new VIP.");
                     }
                 } else vip_id = -1;
             }
-            Console.WriteLine(ci.Data + " left the server.");
+            Log(ci.Data + " left the server.");
             if (m_players.Remove((string)ci.Data)) {
                 m_server.Broadcast(Parser.ToBytes(Command.Disconnect, (string)ci.Data));
                 if (m_game != null && m_game.Contains((string)ci.Data)) {
@@ -320,7 +347,7 @@ namespace SecretHitlerServer
                     else if (!m_players.Contains(key)) {
                         m_players.Add(key);
                         m_server.Broadcast(Parser.ToBytes(Command.Name, key));
-                        Console.WriteLine(key + " has joined the game.");
+                        Log(key + " has joined the game.");
                     }
             }
         }
