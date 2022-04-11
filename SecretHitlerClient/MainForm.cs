@@ -101,19 +101,20 @@ namespace SecretHitlerClient
                         m_gameover = false;
                         m_electTrack = m_nLibPol = m_nFascPol = 0;
                         m_role = (Role)cmd[1];
+                        m_audience = m_role == Role.Audience;
                         m_pres = m_chanc = m_lastPres = m_lastChanc = "";
                         OpenRolePopup();
                         if (!m_popHand.IsAlive) m_popHand.Start();
                         if (cmd.Length > 2) {
                             m_fascists = Parser.ToString(cmd, 2).Split(new char[] { (char)Role.Fascist }, StringSplitOptions.RemoveEmptyEntries);
                             if ((Role)cmd.Last() == Role.Hitler)
-                                m_fascists[m_fascists.Length-1] = m_fascists[m_fascists.Length-1].Substring(0,m_fascists[m_fascists.Length-1].Length-1) + " (Hitler)";
+                                m_fascists[m_fascists.Length - 1] = m_fascists[m_fascists.Length - 1].Substring(0, m_fascists[m_fascists.Length - 1].Length - 1) + " (Hitler)";
                             Array.Sort(m_fascists);
                             m_popups.Enqueue(new Popup(string.Join("\n", m_fascists), "Fellow Fascists"));
                             for (int i = 0; i < m_fascists.Length; i++)
-                                if (m_fascists[i][m_fascists[i].Length-1] == ')')
+                                if (m_fascists[i][m_fascists[i].Length - 1] == ')')
                                     m_fascists[i] = m_fascists[i].Substring(0, m_fascists[i].Length - 9);
-                        }
+                        } else m_fascists = null;
                         PlayerListToGame();
                         break;
                     }
