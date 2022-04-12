@@ -16,7 +16,7 @@ namespace SecretHitlerClient
     {
         ClientInfo m_ci;
         List<string> m_players, m_connected;
-        bool m_vip, m_gameover, m_audience;
+        bool m_vip, m_gameover, m_audience, m_participation;
         Role m_role;
         readonly Thread m_popHand;
         readonly Queue<Popup> m_popups;
@@ -30,6 +30,7 @@ namespace SecretHitlerClient
         public MainForm(string[] args = null)
         {
             m_vip = m_gameover = m_audience = false;
+            m_participation = true;
             m_electTrack = 0;
             m_connected = new List<string>(10);
             m_popups = new Queue<Popup>();
@@ -252,8 +253,7 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.VIP:
-                        m_vip = true;
-                        ShowVIP();
+                        ShowVIP(true);
                         break;
                     case Command.Update: {
                         m_role = Role.Audience;
@@ -271,6 +271,10 @@ namespace SecretHitlerClient
                         if (m_players != null) {
                             m_players.Remove(player);
                             UpdatePlayerTable();
+                        }
+                        if (m_currPop != null && ClearPlayer(m_currPop.Controls, player)) {
+                            m_currPop.AdjustSize();
+                            MainForm_Resize(this, EventArgs.Empty);
                         }
                         m_connected.Remove(player);
                         UpdatePlayerListBox();
@@ -473,6 +477,24 @@ namespace SecretHitlerClient
             }
             m_popups.Enqueue(new Popup(caption, title, radios, button));
         }
+
+        //popup handling
+        private bool ClearPlayer(Control.ControlCollection ctrls, string player)
+        {
+            bool removed = false;
+            for (int i = 0; i < ctrls.Count; i++)
+                if (ctrls[i].HasChildren) {
+                    if (ClearPlayer(ctrls[i].Controls, player))
+                        removed = true;
+                } else if (ctrls[i].Text == player) {
+                    removed = true;
+                    if (ctrls[i].InvokeRequired)
+                        ctrls[i].Invoke(new Action(() => ctrls.RemoveAt(i--)));
+                    else
+                        ctrls.RemoveAt(i--);
+                }
+            return removed;
+        }
         private void OpenPopups()
         {
             while (true) {
@@ -552,14 +574,15 @@ namespace SecretHitlerClient
             PlayerListPanel.Show();
         }
         //update UI elements
-        private void ShowVIP()
+        private void ShowVIP(bool isVIP)
         {
             if (InvokeRequired) {
-                Invoke(new MethodInvoker(ShowVIP));
+                Invoke(new Action(() => ShowVIP(isVIP)));
                 return;
             }
-            Text += ": VIP";
-            StartButton.Visible = true;
+            m_vip = isVIP;
+            Text = "SecretHitler" + (m_vip ? ": VIP" : "");
+            StartButton.Visible = m_vip;
         }
 
         //login panel
@@ -638,6 +661,13 @@ namespace SecretHitlerClient
             PlayerListBox.Items.Clear();
             PlayerListBox.Items.AddRange(m_connected.ToArray());
         }
+        private void ParticipationBtn_Click(object sender, EventArgs e)
+        {
+            m_participation = !m_participation;
+            m_ci.Send(new byte[]{3, (byte)Command.Settings, (byte)Setting.Participation, (byte)(m_participation ? 1 : 0)});
+            ParticipationBtn.Text = (m_participation ? "Leave" : "Join") + " Game";
+            if (m_vip && !m_participation) ShowVIP(false);
+        }
         private void StartButton_Click(object sender, EventArgs e)
         {
             if (StartButton.Text == "Start") {
@@ -666,6 +696,7 @@ namespace SecretHitlerClient
                 ((PictureBox)PlayerTable.GetControlFromPosition(0, i)).Image = null;
             }
         }
+
         private void UpdateStatusMsg(string text, Color txtCol)
         {
             if (StatusMsg.InvokeRequired) {

@@ -1,6 +1,5 @@
 server crashes with "Bad data"?
 
 handle player leaving during legislative section (if pres or chanc)
-add a way to leave/join game on playerlist panel
 special election should not skip players
 fix issue with clients joining too close together?

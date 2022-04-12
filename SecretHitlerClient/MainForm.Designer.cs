@@ -69,6 +69,7 @@ namespace SecretHitlerClient
             this.FascistBoard = new System.Windows.Forms.PictureBox();
             this.RoleDisplay = new System.Windows.Forms.Label();
             this.UsernameDisplay = new System.Windows.Forms.Label();
+            this.ParticipationBtn = new System.Windows.Forms.Button();
             this.LoginPanel.SuspendLayout();
             this.PlayerListPanel.SuspendLayout();
             this.GamePanel.SuspendLayout();
@@ -173,6 +174,7 @@ namespace SecretHitlerClient
             // 
             // PlayerListPanel
             // 
+            this.PlayerListPanel.Controls.Add(this.ParticipationBtn);
             this.PlayerListPanel.Controls.Add(this.PlayerLabel);
             this.PlayerListPanel.Controls.Add(this.PlayerListBox);
             this.PlayerListPanel.Controls.Add(this.StartButton);
@@ -208,10 +210,10 @@ namespace SecretHitlerClient
             // StartButton
             // 
             this.StartButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.StartButton.Location = new System.Drawing.Point(497, 320);
+            this.StartButton.Location = new System.Drawing.Point(485, 344);
             this.StartButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(81, 23);
+            this.StartButton.Size = new System.Drawing.Size(104, 23);
             this.StartButton.TabIndex = 0;
             this.StartButton.Text = "Start";
             this.StartButton.UseVisualStyleBackColor = true;
@@ -590,6 +592,17 @@ namespace SecretHitlerClient
             this.UsernameDisplay.Text = "playername";
             this.UsernameDisplay.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
+            // ParticipationBtn
+            // 
+            this.ParticipationBtn.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ParticipationBtn.Location = new System.Drawing.Point(485, 316);
+            this.ParticipationBtn.Name = "ParticipationBtn";
+            this.ParticipationBtn.Size = new System.Drawing.Size(104, 23);
+            this.ParticipationBtn.TabIndex = 3;
+            this.ParticipationBtn.Text = "Leave Game";
+            this.ParticipationBtn.UseVisualStyleBackColor = true;
+            this.ParticipationBtn.Click += new System.EventHandler(this.ParticipationBtn_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -675,6 +688,7 @@ namespace SecretHitlerClient
         private System.Windows.Forms.Label StatusMsg;
         private System.Windows.Forms.PictureBox Player10Pos;
         private System.Windows.Forms.Label Player10Label;
+        private System.Windows.Forms.Button ParticipationBtn;
     }
 }
 
