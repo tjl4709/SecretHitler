@@ -543,6 +543,10 @@ namespace SecretHitlerClient
             }
             PlayerListPanel.Hide();
             m_players = new List<string>(m_connected);
+            while (m_players[0] != UsernameDisplay.Text) {
+                m_players.Add(m_players[0]);
+                m_players.RemoveAt(0);
+            }
             RoleDisplay.Text = m_audience ? "Audience" : m_role.ToString();
             PosDisplay.Image = null;
             //hide policies
@@ -555,7 +559,7 @@ namespace SecretHitlerClient
             else if (m_players.Count < 9) FascistBoard.Image = Resources.fb7;
             else FascistBoard.Image = Resources.fb9;
             //setup PlayerTable
-            m_players.Remove(UsernameDisplay.Text);
+            m_players.RemoveAt(0);
             UpdatePlayerTable();
             UpdateStatusMsg("", Color.Black);
             GamePanel.Show();
