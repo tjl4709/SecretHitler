@@ -18,6 +18,8 @@ Version 1.3:
  * [feature update] modified chancellor nametag for better readability
  * [bug fix 0004] audience role removed between games
  * [bug fix 0005] colored playernames reset between games
+ * [bug report 0001] "Bad Data" has been fixed, but is replaced with another error from the same
+     source
 ----------------------------------------------------------------------------------------------------
 Version 1.2:
  * [bug fix 0002] corrected logic for who is elligible as next chancellor
