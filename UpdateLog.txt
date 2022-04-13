@@ -18,6 +18,7 @@ Version 1.3:
  * [feature update] modified chancellor nametag for better readability
  * [bug fix 0004] audience role removed between games
  * [bug fix 0005] colored playernames reset between games
+ * [feature update] player list is reordered based on player's position
 ----------------------------------------------------------------------------------------------------
 Version 1.2:
  * [bug fix 0002] corrected logic for who is elligible as next chancellor
