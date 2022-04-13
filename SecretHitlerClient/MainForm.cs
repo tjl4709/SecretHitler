@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using RedCorona.Net;
-using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using SecretHitlerUtilities;
@@ -14,7 +12,7 @@ namespace SecretHitlerClient
 {
     public partial class MainForm : Form
     {
-        ClientInfo m_ci;
+        Client m_ci;
         List<string> m_players, m_connected;
         bool m_vip, m_gameover, m_audience, m_participation;
         Role m_role;
@@ -77,7 +75,7 @@ namespace SecretHitlerClient
             }
         }
 
-        private void ReadBytes(ClientInfo ci, byte[] data, int len)
+        private void ReadBytes(Client ci, byte[] data, int len)
         {
             byte[] cmd;
             for (int cmdStart = 0; cmdStart < len; cmdStart += data[cmdStart] + 1) {
@@ -637,15 +635,27 @@ namespace SecretHitlerClient
                     ErrorLabel.ForeColor = Color.Black;
                     ErrorLabel.Text = "Connecting...";
                     ErrorLabel.Visible = true;
+                    ErrorLabel.Refresh();
                     try {
-                        Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        sock.Connect(ip, port);
-                        m_ci = new ClientInfo(sock, null, ReadBytes, ClientDirection.Both, true);
-                        while (!m_ci.EncryptionReady) Thread.Sleep(100);
-                        m_ci.Send(Parser.ToBytes(Command.Name, UsernameEdit.Text));
-                        ErrorLabel.Text = "Connected!";
+                        m_ci = new Client(ip, port);
+                        int timeout = 10 * 1000, increment = 100;
+                        while (!m_ci.Connected && timeout > 0) {
+                            Thread.Sleep(increment);
+                            timeout -= increment;
+                        }
+                        if (m_ci.Connected) {
+                            m_ci.ReadBytes += ReadBytes;
+                            m_ci.BeginReceive();
+                            m_ci.Send(Parser.ToBytes(Command.Name, UsernameEdit.Text));
+                            ErrorLabel.ForeColor = Color.Black;
+                            ErrorLabel.Text = "Connected!";
+                        } else {
+                            m_ci = null;
+                            ErrorLabel.ForeColor = Color.Red;
+                            ErrorLabel.Text = "Connection Failed: Try Again.";
+                        }
                     } catch (Exception) {
-                        Thread.Sleep(500);
+                        m_ci = null;
                         ErrorLabel.ForeColor = Color.Red;
                         ErrorLabel.Text = "Connection Failed: Try Again.";
                     }

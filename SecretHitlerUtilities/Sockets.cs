@@ -304,9 +304,9 @@ namespace RedCorona.Net {
 		
 		void ReadInternal(byte[] buf, int read, bool alreadyEncrypted)
 		{
-			#if DEBUG
-			Console.WriteLine(ID + " read "+read+" bytes for event handler");
-			#endif
+			//#if DEBUG
+			//Console.WriteLine(ID + " read "+read+" bytes for event handler");
+			//#endif
 			if((!alreadyEncrypted) && (encType != EncryptionType.None)){
 				if(encComplete){
 					#if DEBUG
@@ -515,8 +515,9 @@ namespace RedCorona.Net {
 			encComplete = true;
 			if(OnReady != null) OnReady(this);
 		}
-			
-		public static byte[] GetLengthEncodedVector(byte[] from){
+
+        #region Array Manipulation
+        public static byte[] GetLengthEncodedVector(byte[] from){
 			int l = from.Length;
 			if(l > 255) throw new ArgumentException("Cannot length encode more than 255");
 			byte[] to = new byte[l + 1];
@@ -623,8 +624,9 @@ namespace RedCorona.Net {
 			}
 			return r;
 		}
-		
-		public void Close(string reason){ if(!alreadyclosed){ closeReason = reason; Close(); } }
+        #endregion
+
+        public void Close(string reason){ if(!alreadyclosed){ closeReason = reason; Close(); } }
 		public void Close(){
 			if(!alreadyclosed){
 				if(server != null) server.ClientClosed(this);

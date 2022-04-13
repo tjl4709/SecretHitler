@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using RedCorona.Net;
 using SecretHitlerUtilities;
 using System.IO;
 using System.Reflection;
@@ -11,7 +10,7 @@ namespace SecretHitlerServer
     {
         static Server m_server;
         static int vip_id, m_electTrack;
-        static Dictionary<string, ClientInfo> m_clients;
+        static Dictionary<string, Client> m_clients;
         static Dictionary<string, bool> m_participating;
         static List<string> m_players;
         static Game m_game;
@@ -44,7 +43,7 @@ namespace SecretHitlerServer
                 Log(args[0] + " not recognized for whether to log or not. Logging enabled.");
             
             vip_id = -1;
-            m_clients = new Dictionary<string, ClientInfo>(10);
+            m_clients = new Dictionary<string, Client>(10);
             m_participating = new Dictionary<string, bool>(10);
             m_players = new List<string>(10);
             try {
@@ -53,7 +52,7 @@ namespace SecretHitlerServer
                 Log("Given port was out of range (0-65535) or already in use.");
                 m_server = new Server(0);
             }
-            m_server.ClientReady += ClientReady;
+            m_server.ConnectComplete += ClientReady;
             //m_server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
 
             Console.WriteLine("Listening on port " + m_server.Port);
@@ -66,14 +65,14 @@ namespace SecretHitlerServer
             } while (com != "exit");
         }
         
-        static bool ClientReady(Server s, ClientInfo ci)
+        static bool ClientReady(Client ci)
         {
-            ci.OnReadBytes += ReadBytes;
-            ci.OnClose += ConnectionClosed;
+            ci.ReadBytes += ReadBytes;
+            ci.ConnectClosed += ConnectionClosed;
             return true;
         }
 
-        static void ReadBytes(ClientInfo ci, byte[] data, int len)
+        static void ReadBytes(Client ci, byte[] data, int len)
         {
             byte[] cmd;
             for (int cmdStart = 0; cmdStart < len; cmdStart += data[cmdStart] + 1) {
@@ -89,13 +88,9 @@ namespace SecretHitlerServer
                             ci.Send(new byte[] { 2, (byte)Command.Name, 0 });
                         } else {
                             ci.Send(new byte[] { 2, (byte)Command.Name, 1 });
-                            ci.Data = name;
+                            ci.Name = name;
                             Log(name + " has connected to the server");
-                            if (vip_id == -1) {
-                                vip_id = ci.ID;
-                                ci.Send(new byte[] { 1, (byte)Command.VIP });
-                                Log(name + " is the VIP");
-                            }
+                            CheckVIP(ci);
                             m_clients.Add(name, ci);
                             m_participating.Add(name, true);
                             if (m_players.Count > 0)
@@ -141,7 +136,7 @@ namespace SecretHitlerServer
                     case Command.Vote: {
                         if (m_game != null) {
                             if (cmd.Length == 2) {
-                                m_game.Votes[(string)ci.Data] = cmd[1] == 1;
+                                m_game.Votes[ci.Name] = cmd[1] == 1;
                                 CheckVoting();
                             } else ci.Send(Parser.ErrMsg("Improper format: Vote command must only contain boolean value"));
                         } else ci.Send(Parser.ErrMsg("Game not started"));
@@ -285,15 +280,24 @@ namespace SecretHitlerServer
                     m_players.Add(key);
                     m_server.Broadcast(Parser.ToBytes(Command.Name, key));
                     Log(key + " has joined the game.");
+                    CheckVIP(m_clients[key]);
                 }
+        }
+        static void CheckVIP(Client ci)
+        {
+            if (vip_id == -1) {
+                vip_id = ci.ID;
+                ci.Send(new byte[] { 1, (byte)Command.VIP });
+                Log(ci.Name + " is the VIP");
+            }
         }
         static void FindVIP()
         {
             if (m_clients.Count > 0) {
                 vip_id = int.MaxValue;
-                ClientInfo newVIP = null;
-                foreach (ClientInfo client in m_clients.Values)
-                    if (m_participating[(string)client.Data] && client.ID < vip_id) {
+                Client newVIP = null;
+                foreach (Client client in m_clients.Values)
+                    if (m_participating[client.Name] && client.ID < vip_id) {
                         vip_id = client.ID;
                         newVIP = client;
                     }
@@ -304,16 +308,16 @@ namespace SecretHitlerServer
             } else vip_id = -1;
         }
 
-        static void ParseFascistPower(ClientInfo ci, byte[] cmd)
+        static void ParseFascistPower(Client ci, byte[] cmd)
         {
             if (m_game != null) {
                 if ((FascistPowers)cmd[1] == FascistPowers.Veto) {
                     string msg;
-                    if ((string)ci.Data == m_game.Chancellor) {
+                    if (ci.Name == m_game.Chancellor) {
                         Log((msg = "The Chancellor has requested a veto") + '.');
                         m_server.Broadcast(Parser.ToBytes(Command.General, msg));
                         m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
-                    } else if ((string)ci.Data == m_game.President) {
+                    } else if (ci.Name == m_game.President) {
                         if (cmd[2] == 1) {
                             msg = "The President has accepted the veto";
                             m_game.Discard(m_policies);
@@ -324,7 +328,7 @@ namespace SecretHitlerServer
                         m_server.Broadcast(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, cmd[2] });
                         if (cmd[2] == 1) IncElectTrack();
                     }
-                } else if ((string)ci.Data == m_game.President) {
+                } else if (ci.Name == m_game.President) {
                     string player = "";
                     if ((FascistPowers)cmd[1] != FascistPowers.PolicyPeek)
                         player = Parser.ToString(cmd, 2);
@@ -357,7 +361,7 @@ namespace SecretHitlerServer
                 } else ci.Send(Parser.ErrMsg("Only the president may use presidential powers"));
             } else ci.Send(Parser.ErrMsg("Game not started"));
         }
-        static void ParseSetting(ClientInfo ci, byte[] cmd)
+        static void ParseSetting(Client ci, byte[] cmd)
         {
             if (cmd.Length < 2) {
                 ci.Send(Parser.ErrMsg("Missing setting information"));
@@ -366,18 +370,18 @@ namespace SecretHitlerServer
             switch((Setting)cmd[1]) {
                 case Setting.Participation: {
                     if (cmd.Length == 3) {
-                        string name = (string)ci.Data;
-                        m_participating[name] = cmd[2] == 1;
-                        if (m_participating[name]) {
-                            if (m_players.Count < 10 && !m_players.Contains(name)) {
-                                m_players.Add(name);
-                                Log(name + " has joined the game");
-                                m_server.Broadcast(Parser.ToBytes(Command.Name, name));
+                        m_participating[ci.Name] = cmd[2] == 1;
+                        if (m_participating[ci.Name]) {
+                            if (m_players.Count < 10 && !m_players.Contains(ci.Name)) {
+                                m_players.Add(ci.Name);
+                                Log(ci.Name + " has joined the game");
+                                m_server.Broadcast(Parser.ToBytes(Command.Name, ci.Name));
+                                CheckVIP(ci);
                             }
-                        } else if (m_players.Contains(name)) {
-                            m_players.Remove(name);
-                            m_server.Broadcast(Parser.ToBytes(Command.Disconnect, name));
-                            Log(name + " has left the game");
+                        } else if (m_players.Contains(ci.Name)) {
+                            m_players.Remove(ci.Name);
+                            m_server.Broadcast(Parser.ToBytes(Command.Disconnect, ci.Name));
+                            Log(ci.Name + " has left the game");
                             if (ci.ID == vip_id) FindVIP();
                             TryJoining();
                         }
@@ -397,24 +401,24 @@ namespace SecretHitlerServer
             m_logWriter?.WriteLine(msg);
         }
 
-        static void ConnectionClosed(ClientInfo ci)
+        static void ConnectionClosed(Client ci)
         {
-            if (ci.Data != null)
-                m_clients.Remove((string)ci.Data);
+            if (ci.Name != "")
+                m_clients.Remove(ci.Name);
             if (ci.ID == vip_id) {
                 FindVIP();
             }
-            Log(ci.Data + " left the server.");
-            if (m_players.Remove((string)ci.Data)) {
-                m_server.Broadcast(Parser.ToBytes(Command.Disconnect, (string)ci.Data));
-                if (m_game != null && m_game.Contains((string)ci.Data)) {
+            Log(ci.Name + " left the server.");
+            if (m_players.Remove(ci.Name)) {
+                m_server.Broadcast(Parser.ToBytes(Command.Disconnect, ci.Name));
+                if (m_game != null && m_game.Contains(ci.Name)) {
                     bool inVote = !m_game.VotingComplete;
-                    m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, (string)ci.Data));
-                    if (m_game.Kill((string)ci.Data)) {
-                        m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected and was hitler"));
+                    m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, ci.Name));
+                    if (m_game.Kill(ci.Name)) {
+                        m_server.Broadcast(Parser.ToBytes(Command.General, ci.Name + " has been disconnected and was hitler"));
                         SendWinner("Hitler has left so the Liberals win.");
                     } else {
-                        m_server.Broadcast(Parser.ToBytes(Command.General, ci.Data + " has been disconnected"));
+                        m_server.Broadcast(Parser.ToBytes(Command.General, ci.Name + " has been disconnected"));
                         if (inVote) CheckVoting();
                     }
                 }
