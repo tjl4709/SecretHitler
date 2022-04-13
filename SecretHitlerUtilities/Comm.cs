@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace SecretHitlerUtilities
 {
@@ -50,15 +51,32 @@ namespace SecretHitlerUtilities
             ID = NEXT_ID++;
             m_buffer = new byte[BUF_SZ];
         }
-        public Client(IPAddress ip, int port, string name = "")
+        public Client(IPAddress ip, int port, string name = "", ReceiveReadBytes read = null)
         {
+            ReadBytes = read;
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             m_socket.BeginConnect(new IPEndPoint(ip, port), ConnectCallback, this);
             Name = name;
             ID = NEXT_ID++;
             m_buffer = new byte[BUF_SZ];
         }
+        public Client(IPAddress ip, int port, ReceiveReadBytes read) : this(ip, port, "", read) { }
 
+        //public bool Reconnect()
+        //{
+        //    EndPoint ep = m_socket.RemoteEndPoint;
+        //    if (m_socket.Connected)
+        //        m_socket.Disconnect(true);
+        //    m_socket.ConnectAsync(ep);
+        //    int increment = 250, timeout = 5 * 1000;
+        //    while (!m_socket.Connected && timeout > 0) {
+        //        Thread.Sleep(increment);
+        //        timeout -= increment;
+        //    }
+        //    if (m_socket.Connected)
+        //        BeginReceive();
+        //    return m_socket.Connected;
+        //}
         internal void SetServer(Server s) { if (m_server == null) m_server = s; }
 
         public void Send(byte[] data)
@@ -88,6 +106,8 @@ namespace SecretHitlerUtilities
                 Console.WriteLine((string.IsNullOrEmpty(client.Name) ? "Client " + client.ID : client.Name) + " connection complete");
 #endif
                 client.OnConnectComplete();
+                if (client.ReadBytes != null)
+                    client.BeginReceive();
             } catch { }
         }
         protected static void SendCallback(IAsyncResult result)

@@ -1,5 +1,5 @@
-server crashes with "Bad data"?
-add disconnect, reconnect buttons
+reconnecting can cause multiple vips
+
 handle player leaving during legislative section (if pres or chanc)
 special election should not skip players
 fix issue with clients joining too close together?

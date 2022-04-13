@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SecretHitlerUtilities;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace SecretHitlerServer
 {
@@ -17,7 +18,8 @@ namespace SecretHitlerServer
         static string m_nextChanc;
         static List<Role> m_policies;
         static string m_logFile = null;
-        static StreamWriter m_logWriter = null;
+        static Queue<string> m_logQ;
+        static Thread m_logThread;
 
         static void Main(string[] args)
         {
@@ -28,7 +30,10 @@ namespace SecretHitlerServer
                 m_logFile = m_logFile.Substring(0, m_logFile.LastIndexOf('\\') + 1) + "logs";
                 if (!Directory.Exists(m_logFile)) Directory.CreateDirectory(m_logFile);
                 m_logFile += "\\SHSL_" + DateTime.Now.ToString("s").Replace('T', '_').Replace(':', '-') + ".log";
-                m_logWriter = File.CreateText(m_logFile);
+                m_logQ = new Queue<string>();
+                m_logThread = new Thread(LogQHandler);
+                m_logThread.IsBackground = true;
+                m_logThread.Start();
                 AppDomain.CurrentDomain.UnhandledException += (s, a) => {
 #if DEBUG
                     Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.ToString());
@@ -36,7 +41,7 @@ namespace SecretHitlerServer
                     Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.Message);
 #endif
                 };
-                AppDomain.CurrentDomain.ProcessExit += (s, e) => m_logWriter?.Close();
+                AppDomain.CurrentDomain.ProcessExit += (s, a) => { while (m_logQ.Count > 0) Thread.Sleep(100);};
             }
             string[] doLog = { "1", "yes", "t", "true" };
             if (args.Length > 0 && Array.IndexOf(doLog, args[0].ToLower()) == -1)
@@ -398,13 +403,26 @@ namespace SecretHitlerServer
         static void Log(string msg)
         {
             Console.WriteLine(msg);
-            m_logWriter?.WriteLine(msg);
+            m_logQ.Enqueue(msg);
+        }
+        static void LogQHandler()
+        {
+            while (Thread.CurrentThread.IsAlive) {
+                if (m_logQ.Count > 0) {
+                    StreamWriter sw = new StreamWriter(File.Open(m_logFile, FileMode.Append));
+                    while (m_logQ.Count > 0) sw.WriteLine(m_logQ.Dequeue());
+                    sw.Close();
+                }
+                Thread.Sleep(1000);
+            }
         }
 
         static void ConnectionClosed(Client ci)
         {
-            if (ci.Name != "")
+            if (ci.Name != "") {
                 m_clients.Remove(ci.Name);
+                m_participating.Remove(ci.Name);
+            }
             if (ci.ID == vip_id) {
                 FindVIP();
             }

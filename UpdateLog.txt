@@ -13,6 +13,9 @@ Version 2.0:
  * [feature update] all pop-ups will be closed automatically before a win message is shown
  * [feature update] disconnected players are removed from pop-ups
  * [feature] after connecting to a server, players can choose to leave/rejoin the game
+ * [bug report 0001] communication method between clients and server has been completely rewritten,
+     hopefully this finally puts bug 0001 to rest
+ * [feature] new menu bar contains button to disconnect and reconnect to the server
 ====================================================================================================
 Version 1.3:
  * [feature update] modified chancellor nametag for better readability
