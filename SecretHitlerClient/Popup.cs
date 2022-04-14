@@ -25,7 +25,7 @@ namespace SecretHitlerClient
             Visible = false;
             InitializeComponent();
             Caption.Text = caption;
-            Title.Text = ' ' + title;
+            Title.Text = title;
         }
         public Popup(string caption, string title, Bitmap[] imgs, bool closeable = true) : this(caption, title)
         {

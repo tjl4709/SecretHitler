@@ -10,7 +10,7 @@ namespace SecretHitlerUtilities
         private string m_pres, m_chanc;
         public string President { get { return m_pres; } set { if (m_parties.ContainsKey(value)) m_pres = value; } }
         public string NextPrez {
-            get { return m_parties.ElementAt(m_nextPrezIdx).Key; }
+            get { return m_nextPrezIdx < m_parties.Count ? m_parties.ElementAt(m_nextPrezIdx).Key : ""; }
             set {
                 if (m_parties.ContainsKey(value)) {
                     m_nextPrezIdx = 0;
@@ -159,8 +159,7 @@ namespace SecretHitlerUtilities
 
         public void NextPrezResult(bool elected)
         {
-            if (elected)
-                President = NextPrez;
+            if (elected) President = NextPrez;
             m_nextPrezIdx = (m_nextPrezIdx + 1) % NumAlive;
         }
     }

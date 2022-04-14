@@ -71,13 +71,6 @@ namespace SecretHitlerServer
                     Console.WriteLine("Listening on port " + m_server.Port);
             } while (com != "exit");
         }
-        
-        static bool ClientReady(Client ci)
-        {
-            ci.ReadBytes += ReadBytes;
-            ci.ConnectClosed += ConnectionClosed;
-            return true;
-        }
 
         static void ReadBytes(Client ci, byte[] data, int len)
         {
@@ -121,8 +114,7 @@ namespace SecretHitlerServer
                                 m_policies = null;
                                 m_electTrack = 0;
                                 SendRoles();
-                                m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                                Log(m_game.NextPrez + " is the next President.");
+                                NotifyNextPrez();
                             } else
                                 ci.Send(Parser.ErrMsg("Insufficient amount of players. At least 5 are required"));
                         } else
@@ -168,14 +160,10 @@ namespace SecretHitlerServer
                                                 m_policies = m_game.Draw();
                                                 m_clients[m_game.President].Send(new byte[] { 5, (byte)Command.FascPow, (byte)pow,
                                                 (byte)m_policies[0], (byte)m_policies[1], (byte)m_policies[2] });
-                                                m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                                                Log(m_game.NextPrez + " is the next President.");
+                                                NotifyNextPrez();
                                             } else
                                                 m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)pow });
-                                        } else {
-                                            m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                                            Log(m_game.NextPrez + " is the next President.");
-                                        }
+                                        } else NotifyNextPrez();
                                     }
                                 }
                             } else ci.Send(Parser.ErrMsg("Invalid policy choice"));
@@ -200,7 +188,105 @@ namespace SecretHitlerServer
                 }
             }
         }
+        static void ParseFascistPower(Client ci, byte[] cmd)
+        {
+            if (m_game != null) {
+                if ((FascistPowers)cmd[1] == FascistPowers.Veto) {
+                    string msg;
+                    if (ci.Name == m_game.Chancellor) {
+                        Log((msg = "The Chancellor has requested a veto") + '.');
+                        m_server.Broadcast(Parser.ToBytes(Command.General, msg));
+                        m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
+                    } else if (ci.Name == m_game.President) {
+                        if (cmd[2] == 1) {
+                            msg = "The President has accepted the veto";
+                            m_game.Discard(m_policies);
+                            m_policies.Clear();
+                        } else msg = "The President has denied the veto";
+                        Log(msg + '.');
+                        m_server.Broadcast(Parser.ToBytes(Command.General, msg));
+                        m_server.Broadcast(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, cmd[2] });
+                        if (cmd[2] == 1) IncElectTrack();
+                    }
+                } else if (ci.Name == m_game.President) {
+                    string player = "";
+                    if ((FascistPowers)cmd[1] != FascistPowers.PolicyPeek)
+                        player = Parser.ToString(cmd, 2);
+                    switch ((FascistPowers)cmd[1]) {
+                        case FascistPowers.InvestigateLoyalty:
+                            if (player != m_game.InvestigatedPlayer) {
+                                m_game.InvestigatedPlayer = player;
+                                m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.InvestigateLoyalty, player));
+                                ci.Send(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.InvestigateLoyalty, (byte)m_game.GetRole(player) });
+                            } else ci.Send(Parser.ErrMsg("Player already investigated"));
+                            break;
+                        case FascistPowers.SpecialElection:
+                            if (player != m_game.President) {
+                                m_game.NextPrez = player;
+                                Log(player + " has been selected as the next President.");
+                            } else ci.Send(Parser.ErrMsg("Cannot choose current president"));
+                            break;
+                        case FascistPowers.Execution:
+                            m_game.Kill(player);
+                            Log(player + " has been executed.");
+                            m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, player));
+                            if (SendWinner("The Liberals have executed Hitler and won!")) return;
+                            break;
+                        default:
+                            ci.Send(Parser.ErrMsg("Unrecognized presidential power"));
+                            break;
+                    }
+                    NotifyNextPrez();
+                } else ci.Send(Parser.ErrMsg("Only the president may use presidential powers"));
+            } else ci.Send(Parser.ErrMsg("Game not started"));
+        }
+        static void ParseSetting(Client ci, byte[] cmd)
+        {
+            if (cmd.Length < 2) {
+                ci.Send(Parser.ErrMsg("Missing setting information"));
+                return;
+            }
+            switch((Setting)cmd[1]) {
+                case Setting.Participation: {
+                    if (cmd.Length == 3) {
+                        m_participating[ci.Name] = cmd[2] == 1;
+                        if (m_participating[ci.Name]) {
+                            if (m_players.Count < 10 && !m_players.Contains(ci.Name)) {
+                                m_players.Add(ci.Name);
+                                Log(ci.Name + " has joined the game");
+                                m_server.Broadcast(Parser.ToBytes(Command.Name, ci.Name));
+                                CheckVIP(ci);
+                            }
+                        } else if (m_players.Contains(ci.Name)) {
+                            m_players.Remove(ci.Name);
+                            m_server.Broadcast(Parser.ToBytes(Command.Disconnect, ci.Name));
+                            Log(ci.Name + " has left the game");
+                            if (ci.ID == vip_id) FindVIP();
+                            TryJoining();
+                        }
+                    } else ci.Send(Parser.ErrMsg("Missing paticipation information"));
+                    break;
+                }
+                case Setting.AnonymousVoting: {
+                    if (cmd.Length == 3) {
+                        m_anonVote = cmd[2] == 1;
+                    } else ci.Send(Parser.ErrMsg("Missing anonymous voting information"));
+                    break;
+                }
+                default:
+                    ci.Send(Parser.ErrMsg("Unrecognized setting: 0x" + cmd[1].ToString("X")));
+                    break;
+            }
+        }
 
+        static void NotifyNextPrez()
+        {
+            m_nextChanc = "";
+            if (m_game != null) {
+                Log(m_game.NextPrez + " is the next President.");
+                m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
+            }
+        }
         static void SendRoles()
         {
             foreach (string key in m_clients.Keys)
@@ -228,7 +314,7 @@ namespace SecretHitlerServer
         }
         static void CheckVoting()
         {
-            if (m_game.VotingComplete) {
+            if (m_game?.VotingComplete == true) {
                 if (m_anonVote)
                     m_server.Broadcast(new byte[] { 2, (byte)Command.VoteCnt, (byte)m_game.ProVoters.Count });
                 else
@@ -268,8 +354,7 @@ namespace SecretHitlerServer
                 }
                 m_game.President = m_game.Chancellor = "";
             }
-            Log(m_game.NextPrez + " is the next President.");
-            m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
+            NotifyNextPrez();
         }
         static bool SendWinner(string msg)
         {
@@ -320,98 +405,6 @@ namespace SecretHitlerServer
             }
         }
 
-        static void ParseFascistPower(Client ci, byte[] cmd)
-        {
-            if (m_game != null) {
-                if ((FascistPowers)cmd[1] == FascistPowers.Veto) {
-                    string msg;
-                    if (ci.Name == m_game.Chancellor) {
-                        Log((msg = "The Chancellor has requested a veto") + '.');
-                        m_server.Broadcast(Parser.ToBytes(Command.General, msg));
-                        m_clients[m_game.President].Send(new byte[] { 2, (byte)Command.FascPow, (byte)FascistPowers.Veto });
-                    } else if (ci.Name == m_game.President) {
-                        if (cmd[2] == 1) {
-                            msg = "The President has accepted the veto";
-                            m_game.Discard(m_policies);
-                            m_policies.Clear();
-                        } else msg = "The President has denied the veto";
-                        Log(msg + '.');
-                        m_server.Broadcast(Parser.ToBytes(Command.General, msg));
-                        m_server.Broadcast(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.Veto, cmd[2] });
-                        if (cmd[2] == 1) IncElectTrack();
-                    }
-                } else if (ci.Name == m_game.President) {
-                    string player = "";
-                    if ((FascistPowers)cmd[1] != FascistPowers.PolicyPeek)
-                        player = Parser.ToString(cmd, 2);
-                    switch ((FascistPowers)cmd[1]) {
-                        case FascistPowers.InvestigateLoyalty:
-                            if (player != m_game.InvestigatedPlayer) {
-                                m_game.InvestigatedPlayer = player;
-                                m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.InvestigateLoyalty, player));
-                                ci.Send(new byte[] { 3, (byte)Command.FascPow, (byte)FascistPowers.InvestigateLoyalty, (byte)m_game.GetRole(player) });
-                            } else ci.Send(Parser.ErrMsg("Player already investigated"));
-                            break;
-                        case FascistPowers.SpecialElection:
-                            if (player != m_game.President) {
-                                m_game.NextPrez = player;
-                                Log(player + " has been selected as the next President.");
-                            } else ci.Send(Parser.ErrMsg("Cannot choose current president"));
-                            break;
-                        case FascistPowers.Execution:
-                            m_game.Kill(player);
-                            Log(player + " has been executed.");
-                            m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, player));
-                            if (SendWinner("The Liberals have executed Hitler and won!")) return;
-                            break;
-                        default:
-                            ci.Send(Parser.ErrMsg("Unrecognized presidential power"));
-                            break;
-                    }
-                    Log(m_game.NextPrez + " is the next President.");
-                    m_server.Broadcast(Parser.ToBytes(Command.PosAssign, m_game.NextPrez));
-                } else ci.Send(Parser.ErrMsg("Only the president may use presidential powers"));
-            } else ci.Send(Parser.ErrMsg("Game not started"));
-        }
-        static void ParseSetting(Client ci, byte[] cmd)
-        {
-            if (cmd.Length < 2) {
-                ci.Send(Parser.ErrMsg("Missing setting information"));
-                return;
-            }
-            switch((Setting)cmd[1]) {
-                case Setting.Participation: {
-                    if (cmd.Length == 3) {
-                        m_participating[ci.Name] = cmd[2] == 1;
-                        if (m_participating[ci.Name]) {
-                            if (m_players.Count < 10 && !m_players.Contains(ci.Name)) {
-                                m_players.Add(ci.Name);
-                                Log(ci.Name + " has joined the game");
-                                m_server.Broadcast(Parser.ToBytes(Command.Name, ci.Name));
-                                CheckVIP(ci);
-                            }
-                        } else if (m_players.Contains(ci.Name)) {
-                            m_players.Remove(ci.Name);
-                            m_server.Broadcast(Parser.ToBytes(Command.Disconnect, ci.Name));
-                            Log(ci.Name + " has left the game");
-                            if (ci.ID == vip_id) FindVIP();
-                            TryJoining();
-                        }
-                    } else ci.Send(Parser.ErrMsg("Missing paticipation information"));
-                    break;
-                }
-                case Setting.AnonymousVoting: {
-                    if (cmd.Length == 3) {
-                        m_anonVote = cmd[2] == 1;
-                    } else ci.Send(Parser.ErrMsg("Missing anonymous voting information"));
-                    break;
-                }
-                default:
-                    ci.Send(Parser.ErrMsg("Unrecognized setting: 0x" + cmd[1].ToString("X")));
-                    break;
-            }
-        }
-
         static void Log(string msg)
         {
             Console.WriteLine(msg);
@@ -429,27 +422,45 @@ namespace SecretHitlerServer
             }
         }
 
+        static bool ClientReady(Client ci)
+        {
+            ci.ReadBytes += ReadBytes;
+            ci.ConnectClosed += ConnectionClosed;
+            return true;
+        }
         static void ConnectionClosed(Client ci)
         {
-            if (ci.Name != "") {
-                m_clients.Remove(ci.Name);
-                m_participating.Remove(ci.Name);
-            }
-            if (ci.ID == vip_id) {
-                FindVIP();
-            }
+            m_clients.Remove(ci.Name);
+            m_participating.Remove(ci.Name);
+            if (ci.ID == vip_id) FindVIP();
             Log(ci.Name + " left the server.");
             if (m_players.Remove(ci.Name)) {
                 m_server.Broadcast(Parser.ToBytes(Command.Disconnect, ci.Name));
                 if (m_game != null && m_game.Contains(ci.Name)) {
                     bool inVote = !m_game.VotingComplete;
-                    m_server.Broadcast(Parser.FascPowToBytes(FascistPowers.Execution, ci.Name));
-                    if (m_game.Kill(ci.Name)) {
+                    if (m_game?.Kill(ci.Name) == true) {
                         m_server.Broadcast(Parser.ToBytes(Command.General, ci.Name + " has been disconnected and was hitler"));
                         SendWinner("Hitler has left so the Liberals win.");
                     } else {
                         m_server.Broadcast(Parser.ToBytes(Command.General, ci.Name + " has been disconnected"));
-                        if (inVote) CheckVoting();
+                        if (inVote) { //during voting
+                            if (ci.Name == m_game?.NextPrez || ci.Name == m_nextChanc) {
+                                //skip vote and legislative session
+                                m_game.NextPrezResult(false);
+                                NotifyNextPrez();
+                            } else CheckVoting();
+                        } else if (m_nextChanc == m_game.Chancellor) { //during legislative sesion
+                            if (ci.Name == m_game.President || ci.Name == m_game.Chancellor) {
+                                //skip legislative session
+                                m_game.Discard(m_policies);
+                                m_policies.Clear();
+                                NotifyNextPrez();
+                            }
+                        } else if (ci.Name == m_game.NextPrez || ci.Name == m_nextChanc) { //between legislative session and voting
+                            //skip vote and legislative session
+                            m_game.NextPrezResult(false);
+                            NotifyNextPrez();
+                        }
                     }
                 }
                 TryJoining();

@@ -119,7 +119,9 @@ namespace SecretHitlerClient
                     }
                     case Command.PosAssign: {
                         m_lastPres = m_pres;
+                        m_lastChanc = m_chanc;
                         m_pres = Parser.ToString(cmd);
+                        m_chanc = "";
                         UpdatePlayerTable();
                         if (m_pres == UsernameDisplay.Text) {
                             List<string> nominees = new List<string>(m_players);
@@ -132,13 +134,11 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.Vote: {
-                        m_lastChanc = m_chanc;
                         m_chanc = Parser.ToString(cmd);
                         if (m_chanc == UsernameDisplay.Text)
                             PosDisplay.Image = Resources.chanc;
                         UpdatePlayerTable();
-                        if (!m_audience)
-                            OpenVotePopup();
+                        if (!m_audience) OpenVotePopup();
                         break;
                     }
                     case Command.VoteCnt: {
@@ -218,6 +218,15 @@ namespace SecretHitlerClient
                             m_players.Remove(player);
                             UpdatePlayerTable();
                         }
+                        if (player == m_pres || player == m_chanc) {
+                            List<Popup> popups = new List<Popup>(m_popups);
+                            m_popups.Clear();
+                            if (m_currPop != null && IsLeadershipDependent(m_currPop))
+                                ClosePopup(this, EventArgs.Empty);
+                            for (int i = 0; i < popups.Count; i++)
+                                if (!IsLeadershipDependent(popups[i]))
+                                    m_popups.Enqueue(popups[i]);
+                        }
                         if (m_currPop != null && ClearPlayer(m_currPop.Controls, player)) {
                             m_currPop.AdjustSize();
                             MainForm_Resize(this, EventArgs.Empty);
@@ -227,10 +236,8 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.General:
-                        UpdateStatusMsg(Parser.ToString(cmd), true);
-                        break;
                     case Command.Error:
-                        UpdateStatusMsg(Parser.ToString(cmd), false);
+                        UpdateStatusMsg(Parser.ToString(cmd), (Command)cmd[0] == Command.General);
                         break;
                     default:
                         ci.Send(Parser.ErrMsg("Unrecognized command: 0x" + cmd[0].ToString("X")));
@@ -505,6 +512,11 @@ namespace SecretHitlerClient
                         ctrls.RemoveAt(i--);
                 }
             return removed;
+        }
+        private bool IsLeadershipDependent(Popup popup)
+        {
+            return popup.TitleText.Trim() == "Legislative Session" ||
+                popup.TitleText.Trim() == "Election Results" || popup.TitleText.EndsWith("Chancellor");
         }
         private void OpenPopups()
         {

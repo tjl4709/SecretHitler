@@ -1,7 +1,6 @@
 [bugs]
 
 [features]
-handle player leaving during legislative section (if pres or chanc)
 different levels of logging
 special election should not skip players
 
