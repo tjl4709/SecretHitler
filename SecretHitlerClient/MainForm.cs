@@ -125,7 +125,7 @@ namespace SecretHitlerClient
                         UpdatePlayerTable();
                         if (m_pres == UsernameDisplay.Text) {
                             List<string> nominees = new List<string>(m_players);
-                            if (m_players.Count > 5) nominees.Remove(m_lastPres);
+                            if (m_players.Count + (m_audience ? 0 : 1) > 5) nominees.Remove(m_lastPres);
                             nominees.Remove(m_chanc);
                             OpenPlayerSelectPopup(nominees, "Nominate", NominateButton_Click,
                                 "Choose a player to nominate as Chancellor:", "Chancellor Nomination");
