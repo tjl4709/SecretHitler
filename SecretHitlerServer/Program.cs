@@ -20,6 +20,7 @@ namespace SecretHitlerServer
         static string m_logFile = null;
         static Queue<string> m_logQ;
         static Thread m_logThread;
+        static bool m_anonVote;
 
         static void Main(string[] args)
         {
@@ -38,7 +39,7 @@ namespace SecretHitlerServer
 #if DEBUG
                     Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.ToString());
 #else
-                    Log("Unhandled Exception:: " + (a.ExceptionObject as Exception)?.Message);
+                    Log("Unhandled Exception: " + (a.ExceptionObject as Exception)?.Message);
 #endif
                 };
                 AppDomain.CurrentDomain.ProcessExit += (s, a) => { while (m_logQ.Count > 0) Thread.Sleep(100);};
@@ -48,6 +49,7 @@ namespace SecretHitlerServer
                 Log(args[0] + " not recognized for whether to log or not. Logging enabled.");
             
             vip_id = -1;
+            m_anonVote = false;
             m_clients = new Dictionary<string, Client>(10);
             m_participating = new Dictionary<string, bool>(10);
             m_players = new List<string>(10);
@@ -94,7 +96,7 @@ namespace SecretHitlerServer
                         } else {
                             ci.Send(new byte[] { 2, (byte)Command.Name, 1 });
                             ci.Name = name;
-                            Log(name + " has connected to the server");
+                            Log($"{ci.Name}({ci.ID}) has connected to the server");
                             CheckVIP(ci);
                             m_clients.Add(name, ci);
                             m_participating.Add(name, true);
@@ -227,7 +229,10 @@ namespace SecretHitlerServer
         static void CheckVoting()
         {
             if (m_game.VotingComplete) {
-                m_server.Broadcast(Parser.ToBytes(Command.VoteCnt, string.Join(",", m_game.ProVoters)));
+                if (m_anonVote)
+                    m_server.Broadcast(new byte[] { 2, (byte)Command.VoteCnt, (byte)m_game.ProVoters.Count });
+                else
+                    m_server.Broadcast(Parser.ToBytes(Command.VoteCnt, string.Join(",", m_game.ProVoters)));
                 bool passed = m_game.VotePassed;
                 m_game.NextPrezResult(passed);
                 Log($"The vote {(passed ? "passed" : "failed")} with {string.Join(", ", m_game.ProVoters)} voting ja");
@@ -292,25 +297,27 @@ namespace SecretHitlerServer
         {
             if (vip_id == -1) {
                 vip_id = ci.ID;
-                ci.Send(new byte[] { 1, (byte)Command.VIP });
+                ci.Send(new byte[] { 2, (byte)Command.VIP,  (byte)(m_anonVote ? 1 : 0) });
                 Log(ci.Name + " is the VIP");
             }
         }
         static void FindVIP()
         {
+            vip_id = -1;
             if (m_clients.Count > 0) {
-                vip_id = int.MaxValue;
+                int id = int.MaxValue;
                 Client newVIP = null;
                 foreach (Client client in m_clients.Values)
-                    if (m_participating[client.Name] && client.ID < vip_id) {
-                        vip_id = client.ID;
+                    if (m_participating[client.Name] && client.ID < id) {
+                        id = client.ID;
                         newVIP = client;
                     }
-                if (newVIP != null) {
-                    newVIP.Send(new byte[] { 1, (byte)Command.VIP });
-                    Log(newVIP.Data + " is the new VIP.");
+                if (newVIP != null && vip_id == -1) {
+                    vip_id = id;
+                    newVIP.Send(new byte[] { 2, (byte)Command.VIP,  (byte)(m_anonVote ? 1 : 0) });
+                    Log($"{newVIP.Name}({newVIP.ID}) is the new VIP.");
                 }
-            } else vip_id = -1;
+            }
         }
 
         static void ParseFascistPower(Client ci, byte[] cmd)
@@ -390,8 +397,13 @@ namespace SecretHitlerServer
                             if (ci.ID == vip_id) FindVIP();
                             TryJoining();
                         }
-                    } else
-                        ci.Send(Parser.ErrMsg("Missing paticipation information"));
+                    } else ci.Send(Parser.ErrMsg("Missing paticipation information"));
+                    break;
+                }
+                case Setting.AnonymousVoting: {
+                    if (cmd.Length == 3) {
+                        m_anonVote = cmd[2] == 1;
+                    } else ci.Send(Parser.ErrMsg("Missing anonymous voting information"));
                     break;
                 }
                 default:

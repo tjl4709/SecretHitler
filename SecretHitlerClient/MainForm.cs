@@ -142,13 +142,19 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.VoteCnt: {
-                        string[] pros = cmd.Length > 1 ? Parser.ToString(cmd).Split(',') : new string[]{ };
-                        int numPlayers = m_players.Count + (m_audience ? 0 : 1);
-                        List<string> antis = new List<string>(m_players);
-                        antis.Add(UsernameDisplay.Text);
-                        for (int i = 0; i < pros.Length; i++) antis.Remove(pros[i]);
+                        int numPlayers = m_players.Count + (m_audience ? 0 : 1), numPro;
+                        string[] pros = null;
+                        List<string> antis = null;
+                        if (cmd.Length == 2) {
+                            numPro = cmd[1];
+                        } else {
+                            pros = cmd.Length > 1 ? Parser.ToString(cmd).Split(',') : new string[] { };
+                            antis = new List<string>(m_players) { UsernameDisplay.Text };
+                            for (int i = 0; i < pros.Length; i++) antis.Remove(pros[i]);
+                            numPro = pros.Length;
+                        }
                         string passfail;
-                        if (pros.Length > numPlayers / 2) {
+                        if (numPro > numPlayers / 2) {
                             passfail = "pass";
                         } else {
                             m_electTrack++;
@@ -156,8 +162,8 @@ namespace SecretHitlerClient
                             m_chanc = m_lastChanc;
                             passfail = "fail";
                         }
-                        UpdateStatusMsg($"The vote {passfail}ed with {pros.Length}/{numPlayers}.", true);
-                        OpenVoteCntPopup(pros, antis.ToArray());
+                        UpdateStatusMsg($"The vote {passfail}ed with {numPro}/{numPlayers}.", true);
+                        if (cmd.Length != 2) OpenVoteCntPopup(pros, antis.ToArray());
                         MainForm_Resize(this, EventArgs.Empty);
                         break;
                     }
@@ -191,6 +197,7 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.VIP:
+                        AnonVotingMenuItem.Checked = cmd[1] == 1;
                         ShowVIP(true);
                         break;
                     case Command.Update: {
@@ -568,6 +575,7 @@ namespace SecretHitlerClient
             m_players.RemoveAt(0);
             UpdatePlayerTable();
             UpdateStatusMsg("", true);
+            SettingsMenuItem.Visible = false;
             GamePanel.Show();
             MainForm_Resize(this, EventArgs.Empty);
         }
@@ -582,6 +590,7 @@ namespace SecretHitlerClient
             StartButton.Text = "Start";
             UpdatePlayerListBox();
             PlayerListPanel.Show();
+            SettingsMenuItem.Visible = m_vip;
         }
         private void BackToLogin()
         {
@@ -603,6 +612,7 @@ namespace SecretHitlerClient
             }
             m_vip = isVIP;
             Text = "SecretHitler" + (m_vip ? ": VIP" : "");
+            SettingsMenuItem.Visible = m_vip && !GamePanel.Visible;
             StartButton.Visible = m_vip;
         }
 
@@ -620,8 +630,14 @@ namespace SecretHitlerClient
                 m_popups.Clear();
                 if (m_currPop != null)
                     ClosePopup(this, EventArgs.Empty);
+                ShowVIP(false);
                 BackToLogin();
             }
+        }
+        private void AnonVotingMenuItem_Click(object sender, EventArgs e)
+        {
+            m_ci.Send(new byte[] { 3, (byte)Command.Settings,
+                (byte)Setting.AnonymousVoting, (byte)(AnonVotingMenuItem.Checked ? 1 : 0) });
         }
 
         //login panel

@@ -1,5 +1,9 @@
-reconnecting can cause multiple vips
+[bugs]
 
+[features]
 handle player leaving during legislative section (if pres or chanc)
+different levels of logging
 special election should not skip players
-fix issue with clients joining too close together?
+
+[misc]
+move relevant data from server Program to Game

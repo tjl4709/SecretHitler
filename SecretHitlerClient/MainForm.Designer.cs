@@ -74,6 +74,8 @@ namespace SecretHitlerClient
             this.serverToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ReconnectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DisconnectMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SettingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AnonVotingMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoginPanel.SuspendLayout();
             this.PlayerListPanel.SuspendLayout();
             this.GamePanel.SuspendLayout();
@@ -593,7 +595,8 @@ namespace SecretHitlerClient
             // MainMenu
             // 
             this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.serverToolStripMenuItem});
+            this.serverToolStripMenuItem,
+            this.SettingsMenuItem});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
             this.MainMenu.Size = new System.Drawing.Size(800, 24);
@@ -605,6 +608,7 @@ namespace SecretHitlerClient
             this.ReconnectMenuItem,
             this.DisconnectMenuItem});
             this.serverToolStripMenuItem.Name = "serverToolStripMenuItem";
+            this.serverToolStripMenuItem.ShortcutKeyDisplayString = "";
             this.serverToolStripMenuItem.Size = new System.Drawing.Size(51, 20);
             this.serverToolStripMenuItem.Text = "Server";
             // 
@@ -621,6 +625,24 @@ namespace SecretHitlerClient
             this.DisconnectMenuItem.Size = new System.Drawing.Size(180, 22);
             this.DisconnectMenuItem.Text = "Disconnect";
             this.DisconnectMenuItem.Click += new System.EventHandler(this.DisconnectMenuItem_Click);
+            // 
+            // SettingsMenuItem
+            // 
+            this.SettingsMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.SettingsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.AnonVotingMenuItem});
+            this.SettingsMenuItem.Name = "SettingsMenuItem";
+            this.SettingsMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.SettingsMenuItem.Text = "Settings";
+            this.SettingsMenuItem.Visible = false;
+            // 
+            // AnonVotingMenuItem
+            // 
+            this.AnonVotingMenuItem.CheckOnClick = true;
+            this.AnonVotingMenuItem.Name = "AnonVotingMenuItem";
+            this.AnonVotingMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AnonVotingMenuItem.Text = "Anonymous Voting";
+            this.AnonVotingMenuItem.Click += new System.EventHandler(this.AnonVotingMenuItem_Click);
             // 
             // MainForm
             // 
@@ -715,6 +737,8 @@ namespace SecretHitlerClient
         private System.Windows.Forms.ToolStripMenuItem serverToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ReconnectMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DisconnectMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SettingsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem AnonVotingMenuItem;
     }
 }
 

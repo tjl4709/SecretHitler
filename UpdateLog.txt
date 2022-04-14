@@ -8,7 +8,8 @@
 ----------------------------------------------------------------------------------------------------
 Version 2.0:
  * [feature] logging has been added to server (*see readme for how to use in command line)
- * [feature update] upon completetion of voting, a pop-up appears showing how everyone voted
+ * [feature update] upon completetion of voting, a pop-up may appear showing how everyone voted
+ * [feature] VIP now can customize settings before each game (anonymous voting)
  * [feature update] server can now handle a player disconnecting during the voting session
  * [feature update] all pop-ups will be closed automatically before a win message is shown
  * [feature update] disconnected players are removed from pop-ups

@@ -81,7 +81,11 @@ namespace SecretHitlerUtilities
 
         public void Send(byte[] data)
         {
-            m_socket.BeginSend(data, 0, data.Length, SocketFlags.None, SendCallback, this);
+            try {
+                m_socket.BeginSend(data, 0, data.Length, SocketFlags.None, SendCallback, this);
+            } catch (SocketException) {
+                Close();
+            }
         }
         public void BeginReceive()
         {
@@ -182,7 +186,16 @@ namespace SecretHitlerUtilities
 
         public void Send(Client client, byte[] data) { client.Send(data); }
         public void Broadcast(byte[] data)
-        { for (int i = 0; i < m_clients.Count; i++) m_clients.ElementAt(i).Value.Send(data); }
+        {
+            try {
+                for (int i = 0; i < m_clients.Count; i++)
+                    m_clients.ElementAt(i).Value.Send(data);
+            } catch {
+                Thread.Sleep(100);
+                for (int i = 0; i < m_clients.Count; i++)
+                    m_clients.ElementAt(i).Value.Send(data);
+            }
+        }
 
         public void Close()
         {

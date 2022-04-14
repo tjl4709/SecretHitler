@@ -12,7 +12,7 @@ namespace SecretHitlerUtilities
         Policy   = 0x06, //FB policy choices List<L/F>
         FascPow  = 0x07, //FB FascistPower
         Winner   = 0x08, //FB L/F
-        VIP      = 0x09, //to client means they are VIP
+        VIP      = 0x09, //to client means they are VIP FB anonVote(T/F)
         Settings = 0xFB, //FB Setting
         Update   = 0xFC, //to client when joining during game FB num lib pol, num fasc pol, curr pres, curr chanc (audience role implied)
         Disconnect=0xFD, //to client FB playername that disconnected
@@ -38,6 +38,7 @@ namespace SecretHitlerUtilities
     }
     public enum Setting : byte
     {
-        Participation //FB T/F
+        Participation,   //FB T/F
+        AnonymousVoting, //FB T/F
     }
 }
