@@ -270,6 +270,7 @@ namespace SecretHitlerServer
                 case Setting.AnonymousVoting: {
                     if (cmd.Length == 3) {
                         m_anonVote = cmd[2] == 1;
+                        Log("Anonymous voting has been turned o" + (m_anonVote ? "n" : "ff"));
                     } else ci.Send(Parser.ErrMsg("Missing anonymous voting information"));
                     break;
                 }
