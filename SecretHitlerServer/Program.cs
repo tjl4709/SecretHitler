@@ -170,18 +170,26 @@ namespace SecretHitlerServer
                         } else ci.Send(Parser.ErrMsg("Game not started"));
                         break;
                     }
+                    case Command.Winner: {
+                        if (m_game != null) {
+                            if (vip_id == ci.ID) {
+                                m_server.Broadcast(new byte[] { 2, (byte)Command.Winner, (byte)Role.None });
+                                Log("Game ended");
+                                m_game = null;
+                            } else
+                                m_server.Broadcast(Parser.ErrMsg("Only VIP can end the game"));
+                        } else
+                            m_server.Broadcast(Parser.ErrMsg("Game not started"));
+                        break;
+                    }
                     case Command.Settings:
-                        ParseSetting(ci, cmd);
-                        break;
+                        ParseSetting(ci, cmd); break;
                     case Command.FascPow:
-                        ParseFascistPower(ci, cmd);
-                        break;
+                        ParseFascistPower(ci, cmd); break;
                     case Command.General:
-                        Log("Received message: " + Parser.ToString(cmd));
-                        break;
+                        Log("Received message: " + Parser.ToString(cmd)); break;
                     case Command.Error:
-                        Log("Received error: " + Parser.ToString(cmd));
-                        break;
+                        Log("Received error: " + Parser.ToString(cmd)); break;
                     default:
                         ci.Send(Parser.ErrMsg("Unrecognized command: 0x" + cmd[0].ToString("X")));
                         break;

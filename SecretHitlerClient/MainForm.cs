@@ -180,20 +180,24 @@ namespace SecretHitlerClient
                         break;
                     }
                     case Command.FascPow:
-                        ParseFascPow(ci, cmd);
-                        break;
+                        ParseFascPow(ci, cmd); break;
                     case Command.Winner: {
-                        string caption;
-                        if (m_role == Role.Audience)
-                            caption = "";
-                        else if (((Role)cmd[1] == Role.Liberal) == (m_role == Role.Liberal))
-                            caption = "You won!";
-                        else caption = "You lost.";
                         m_gameover = true;
                         m_popups.Clear();
                         if (m_currPop != null) ClosePopup(this, EventArgs.Empty);
-                        m_popups.Enqueue(new Popup(caption, $"The {(Role)cmd[1]}s won", new Bitmap[]
-                            { (Role)cmd[1] == Role.Liberal ? Resources.lpm : Resources.fpm }));
+                        if ((Role)cmd[1] != Role.None) {
+                            string caption;
+                            if (m_role == Role.Audience)
+                                caption = "";
+                            else if (((Role)cmd[1] == Role.Liberal) == (m_role == Role.Liberal))
+                                caption = "You won!";
+                            else caption = "You lost.";
+                            m_popups.Enqueue(new Popup(caption, $"The {(Role)cmd[1]}s won", new Bitmap[]
+                                { (Role)cmd[1] == Role.Liberal ? Resources.lpm : Resources.fpm }));
+                        } else if (!m_vip)
+                            m_popups.Enqueue(new Popup("The VIP has ended the game. Close this" +
+                                "\npopup to go back to the player list.", "Game Ended"));
+                        else GameToPlayerList();
                         break;
                     }
                     case Command.VIP:
@@ -532,7 +536,7 @@ namespace SecretHitlerClient
         }
         private void ClosePopup(object sender, EventArgs e)
         {
-            bool isWinMsg = m_currPop.TitleText.Contains("won");
+            bool isWinMsg = m_currPop.TitleText.Contains("won") || m_currPop.TitleText.Trim() == "Game Ended";
             if (m_currPop.InvokeRequired) {
                 Invoke(new Action(() => Controls.Remove(m_currPop)));
                 m_currPop.Invoke(new MethodInvoker(m_currPop.Dispose));
@@ -588,6 +592,7 @@ namespace SecretHitlerClient
             UpdatePlayerTable();
             UpdateStatusMsg("", true);
             SettingsMenuItem.Visible = false;
+            EndGameMenuItem.Visible = m_vip;
             GamePanel.Show();
             MainForm_Resize(this, EventArgs.Empty);
         }
@@ -603,6 +608,7 @@ namespace SecretHitlerClient
             UpdatePlayerListBox();
             PlayerListPanel.Show();
             SettingsMenuItem.Visible = m_vip;
+            EndGameMenuItem.Visible = false;
         }
         private void BackToLogin()
         {
@@ -625,6 +631,7 @@ namespace SecretHitlerClient
             m_vip = isVIP;
             Text = "SecretHitler" + (m_vip ? ": VIP" : "");
             SettingsMenuItem.Visible = m_vip && !GamePanel.Visible;
+            EndGameMenuItem.Visible = m_vip && GamePanel.Visible;
             StartButton.Visible = m_vip;
         }
 
@@ -651,6 +658,8 @@ namespace SecretHitlerClient
             m_ci.Send(new byte[] { 3, (byte)Command.Settings,
                 (byte)Setting.AnonymousVoting, (byte)(AnonVotingMenuItem.Checked ? 1 : 0) });
         }
+        private void EndGameMenuItem_Click(object sender, EventArgs e)
+        { m_ci.Send(new byte[] { 1, (byte)Command.Winner }); }
 
         //login panel
         private void IPPortEdit_KeyPress(object sender, KeyPressEventArgs e)

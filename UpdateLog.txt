@@ -6,6 +6,10 @@
 [feature removal] feature has been removed
 
 ----------------------------------------------------------------------------------------------------
+Version 2.1:
+ * [bug fix 0006] previous chancellor is not elligible for next chancellor
+ * [feature] VIP now has access to "End Game" button
+----------------------------------------------------------------------------------------------------
 Version 2.0:
  * [feature] logging has been added to server (*see readme for how to use in command line)
  * [feature] new menu bar contains button to disconnect and reconnect to the server
