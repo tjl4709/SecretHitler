@@ -1,6 +1,7 @@
 [bugs]
 
 [features]
+add handling for inelligble chancellor nomination?
 different levels of logging
 special election should not skip players
 

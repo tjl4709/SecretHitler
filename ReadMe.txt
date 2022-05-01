@@ -31,13 +31,15 @@ How To Use Secret Hitler Server:
 2) Communicate your IP and the port that the server reported in the console to the users
 
  Through command line:
-  SecretHitlerServer.exe [logging [port]]
- * specify whether logging is wanted or not
- * default is to log
- * accepted values for logging: disable(0, no, f, false) enable(1, yes, t, true)
- * specify a port to have it run on that port (make sure the port is not already in use)
- * logging must be specified to enter port
- * if no port is specified, it will choose an open one
+  SecretHitlerServer.exe [-l|--log-level L] [-p|--port P]
+ * --log-level (-l for shorthand) sets the logging level
+   * default is 1
+   * 0 = no logging, 1 = logging
+ * --port (-p for shorthand) specifies a port to run server on (make sure the port is not already in
+   use)
+   * default will choose an open port
+   * 0 = find open port, 1-65535 will attempt to open on that port - if this fails it will revert
+     to default
 
 ----------------------------------------------------------------------------------------------------
 Connecting To A Server:

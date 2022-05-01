@@ -9,6 +9,8 @@ namespace SecretHitlerServer
 {
     class Program
     {
+        const int MAX_LOG_LVL = 1, MAX_PORT=65535;
+
         static Server m_server;
         static int vip_id, m_electTrack;
         static Dictionary<string, Client> m_clients;
@@ -24,9 +26,44 @@ namespace SecretHitlerServer
 
         static void Main(string[] args)
         {
-            //set up logging
-            string[] dontLog = { "0", "no", "f", "false" };
-            if (args.Length == 0 || Array.IndexOf(dontLog, args[0].ToLower()) == -1) {
+            int port = ParseCommandArgs(args);
+            vip_id = -1;
+            m_anonVote = false;
+            m_clients = new Dictionary<string, Client>(10);
+            m_participating = new Dictionary<string, bool>(10);
+            m_players = new List<string>(10);
+            try {
+                m_server = new Server(port);
+            } catch {
+                Log("Given port was already in use.");
+                m_server = new Server(0);
+            }
+            m_server.ConnectComplete += ClientReady;
+            Console.WriteLine("Listening on port " + m_server.Port);
+            Console.WriteLine("Enter \"Exit\" to stop server.");
+            string com;
+            do {
+                com = Console.ReadLine().Trim().ToLower();
+                if (com == "port")
+                    Console.WriteLine("Listening on port " + m_server.Port);
+            } while (com != "exit");
+        }
+        static int ParseCommandArgs(string[] args)
+        {
+            int port = 0, log = 1;
+            #region //parse logging
+            int idxInf = Array.IndexOf(args, "-l"),           lidxInf = Array.LastIndexOf(args, "-l"),
+                idxFrml = Array.IndexOf(args, "--log-level"), lidxFrml = Array.LastIndexOf(args, "--log-level");
+            if (idxInf != -1 && idxFrml != -1 || idxInf != lidxInf || idxFrml != lidxFrml)
+                Console.WriteLine("Logging level specified multiple times, using first most verbose valid occurence");
+            if (idxInf != -1 || idxFrml != -1)
+                if (!TryParseLog(args, idxFrml, out log) && !TryParseLog(args, lidxFrml, out log) &&
+                    !TryParseLog(args, idxInf, out log) &&  !TryParseLog(args, lidxInf, out log)) {
+                    Console.WriteLine("Logging level specified without valid argument: logging enabled");
+                    log = 1;
+                }
+            #endregion
+            if (log > 0) /*set up logging*/ {
                 m_logFile = Assembly.GetEntryAssembly().Location;
                 m_logFile = m_logFile.Substring(0, m_logFile.LastIndexOf('\\') + 1) + "logs";
                 if (!Directory.Exists(m_logFile)) Directory.CreateDirectory(m_logFile);
@@ -44,32 +81,36 @@ namespace SecretHitlerServer
                 };
                 AppDomain.CurrentDomain.ProcessExit += (s, a) => { while (m_logQ.Count > 0) Thread.Sleep(100);};
             }
-            string[] doLog = { "1", "yes", "t", "true" };
-            if (args.Length > 0 && Array.IndexOf(doLog, args[0].ToLower()) == -1)
-                Log(args[0] + " not recognized for whether to log or not. Logging enabled.");
-            
-            vip_id = -1;
-            m_anonVote = false;
-            m_clients = new Dictionary<string, Client>(10);
-            m_participating = new Dictionary<string, bool>(10);
-            m_players = new List<string>(10);
-            try {
-                m_server = new Server(args.Length > 1 && int.TryParse(args[1], out int port) ? port : 0);
-            } catch {
-                Log("Given port was out of range (0-65535) or already in use.");
-                m_server = new Server(0);
+            #region //parse port
+            idxInf = Array.IndexOf(args, "-p");      lidxInf = Array.LastIndexOf(args, "-p");
+            idxFrml = Array.IndexOf(args, "--port"); lidxFrml = Array.LastIndexOf(args, "--port");
+            if (idxInf != -1 && idxFrml != -1 || idxInf != lidxInf || idxFrml != lidxFrml)
+                Console.WriteLine("Port specified multiple times, using first most verbose valid occurence");
+            if (idxInf != -1 || idxFrml != -1)
+                if (!TryParsePort(args, idxFrml, out port) && !TryParsePort(args, lidxFrml, out port) &&
+                    !TryParsePort(args, idxInf, out port) &&  !TryParsePort(args, lidxInf, out port)) {
+                    Console.WriteLine("Port specified without valid argument: finding open port");
+                    port = 0;
+                }
+            return port;
+            #endregion
+        }
+        static bool TryParseLog(string[] args, int index, out int log)
+        { return TryParseIntArg(args, index, 0, MAX_LOG_LVL, out log); }
+        static bool TryParsePort(string[] args, int index, out int port)
+        { return TryParseIntArg(args, index, 0, MAX_PORT, out port); }
+        static bool TryParseIntArg(string[] args, int index, int minBound, int maxBound, out int output)
+        {
+            output = -1;
+            if (index >= 0) {
+                if (index < args.Length - 1 && !args[index + 1].Contains("-")) {
+                    if (!(int.TryParse(args[index + 1], out output) && output >= minBound && output <= maxBound)) {
+                        output = -1;
+                        Console.WriteLine($"Error: {args[index + 1]} is not a valid number");
+                    }
+                } else Console.WriteLine($"Error: {args[index]} missing arguments");
             }
-            m_server.ConnectComplete += ClientReady;
-            //m_server.DefaultEncryptionType = EncryptionType.ServerRSAClientKey;
-
-            Console.WriteLine("Listening on port " + m_server.Port);
-            Console.WriteLine("Enter \"Exit\" to stop server.");
-            string com;
-            do {
-                com = Console.ReadLine().Trim().ToLower();
-                if (com == "port")
-                    Console.WriteLine("Listening on port " + m_server.Port);
-            } while (com != "exit");
+            return output != -1;
         }
 
         static void ReadBytes(Client ci, byte[] data, int len)
@@ -417,7 +458,7 @@ namespace SecretHitlerServer
         static void Log(string msg)
         {
             Console.WriteLine(msg);
-            m_logQ.Enqueue(msg);
+            m_logQ?.Enqueue(msg);
         }
         static void LogQHandler()
         {
