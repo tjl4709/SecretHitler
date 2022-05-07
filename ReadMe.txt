@@ -20,10 +20,10 @@ How To Use Secret Hitler:
  Through command line:
   SecretHitler.exe [IP:port [username]]
  * IP:port must be formatted in the same manner as step 2 above
- * username an only be given if IP:port is also given
+ * username can only be given if IP:port is also given
  * if just IP:port is given, it autofills the "IP and Port" textbox, but you must type in your
    username and click the submit button
- * If both parameters are given, it will automatically connect to the server
+ * If both parameters are given, it will automatically attempt to connect to the server
 
 ----------------------------------------------------------------------------------------------------
 How To Use Secret Hitler Server:
@@ -51,7 +51,7 @@ Look for an entry labeled "IPv4 Address" and use this value as the IP to connect
 computer running the server, use a static IP (look up a tutorial for your OS/device). Open a new
 notepad window and type in the path to the server executable followed by the port you want to use,
 then save this as a .bat file. Run this file instead of the server executable so that it uses the
-same port eveytime. Look up hot to set up port forwarding/triggering on your router and enable it
+same port everytime. Look up how to set up port forwarding/triggering on your router and enable it
 for the port you chose in the .bat file and the static IP that you set for the computer. Players
 will use the IP of your router (this can be found by opening a web browser on the server computer
 and searching "my ip") and the port that you chose to connect to the server.
