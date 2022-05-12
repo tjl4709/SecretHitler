@@ -12,6 +12,7 @@ namespace SecretHitlerClient
 {
     public partial class MainForm : Form
     {
+        static readonly int MAX_USERNAME_LEN = 15;
         Client m_ci;
         List<string> m_players, m_connected;
         bool m_vip, m_gameover, m_audience, m_participation;
@@ -690,7 +691,13 @@ namespace SecretHitlerClient
             }
         }
         private void UsernameEdit_KeyPress(object sender, KeyPressEventArgs e)
-        { if (!char.IsLetterOrDigit(e.KeyChar) && e.KeyChar != '\b') e.Handled = true; }
+        {
+            if (e.KeyChar == '\u007f') {
+                UsernameEdit.Clear();
+                e.Handled = true;
+            } else if (e.KeyChar != '\b' && (!char.IsLetterOrDigit(e.KeyChar) || UsernameEdit.TextLength >= MAX_USERNAME_LEN))
+                e.Handled = true;
+        }
         private void SubmitButton_Click(object sender, EventArgs e)
         {
             if (m_ci == null) {
@@ -703,7 +710,7 @@ namespace SecretHitlerClient
                     ErrorLabel.Text = "IP must be entered in the form #.#.#.#";
                 else if (!int.TryParse(IPPortEdit.Text.Substring(colon + 1), out int port) || port < 0 || port > 65535)
                     ErrorLabel.Text = "Port must be a number in the range 0-65535.";
-                else if (UsernameEdit.Text.Length < 2 || UsernameEdit.Text.Length > 15)
+                else if (UsernameEdit.Text.Length < 2 || UsernameEdit.Text.Length > MAX_USERNAME_LEN)
                     ErrorLabel.Text = "Username must be 2-15 characters long.";
                 else {
                     ErrorLabel.ForeColor = Color.Black;
